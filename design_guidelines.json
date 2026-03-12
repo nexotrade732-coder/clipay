@@ -1,0 +1,123 @@
+{
+  "brand_identity": {
+    "name": "CLIPAY",
+    "theme_mode": "light",
+    "emotional_archetype": "The Performance Pro (Fintech Edition)",
+    "core_values": ["Trust", "Energy", "Growth", "Clarity"],
+    "colors": {
+      "primary": {
+        "name": "Clip Blue",
+        "hex": "#3B82F6",
+        "tailwind": "blue-500",
+        "usage": "Primary actions, active states, key highlights"
+      },
+      "secondary": {
+        "name": "Earning Orange",
+        "hex": "#f97316",
+        "tailwind": "orange-500",
+        "usage": "CTAs, earning notifications, progress accents"
+      },
+      "background": {
+        "page": "#f8fafc",
+        "tailwind": "bg-slate-50",
+        "surface": "#ffffff",
+        "tailwind_surface": "bg-white"
+      },
+      "text": {
+        "primary": "#0f172a",
+        "tailwind": "text-slate-900",
+        "secondary": "#64748b",
+        "tailwind": "text-slate-500",
+        "muted": "#94a3b8",
+        "tailwind": "text-slate-400"
+      },
+      "border": {
+        "default": "#e2e8f0",
+        "tailwind": "border-slate-200"
+      }
+    },
+    "typography": {
+      "headings": {
+        "family": "Manrope, sans-serif",
+        "weights": ["600", "700", "800"],
+        "usage": "All section titles, card headers, and hero text. Adds a modern, geometric but friendly feel."
+      },
+      "body": {
+        "family": "Inter, sans-serif",
+        "weights": ["400", "500"],
+        "usage": "General text, data tables, and descriptions for maximum legibility."
+      }
+    }
+  },
+  "design_principles": {
+    "anti_ai_rules": [
+      "NO generic centered layouts. Use asymmetrical grids for the landing page.",
+      "NO full-width solid gradients. Use subtle mesh gradients or white space.",
+      "NO 'Inter' for Headings. Use Manrope to give character.",
+      "Avoid 100% grey text. Always tint greys with a hint of blue (slate scale)."
+    ],
+    "surface_strategy": "Card-based Modernism. All content lives in white cards with rounded-2xl corners, subtle 1px slate-200 borders, and soft shadow-sm. This creates a clean, 'lifted' feel against the slate-50 background.",
+    "spacing_scale": "Generous. Use p-6 or p-8 for card padding. Gap-6 for grids. Do not cram data.",
+    "micro_interactions": "Buttons should scale down slightly (0.98) on click. Cards should lift (-2px) on hover with a shadow boost."
+  },
+  "components": {
+    "cards": {
+      "base": "bg-white rounded-2xl border border-slate-200 shadow-sm transition-all duration-200 hover:shadow-md",
+      "dashboard_stat": "p-6 flex flex-col justify-between relative overflow-hidden"
+    },
+    "buttons": {
+      "primary": "bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl px-6 py-2.5 transition-all shadow-sm hover:shadow-blue-200",
+      "secondary": "bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 font-medium rounded-xl px-6 py-2.5 transition-all",
+      "accent": "bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-xl px-6 py-2.5 shadow-orange-100"
+    },
+    "inputs": {
+      "style": "bg-white border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 rounded-xl px-4 py-3 text-slate-900 placeholder:text-slate-400 transition-all"
+    },
+    "badges": {
+      "success": "bg-emerald-50 text-emerald-700 border border-emerald-100 px-2.5 py-0.5 rounded-full text-xs font-medium",
+      "warning": "bg-amber-50 text-amber-700 border border-amber-100 px-2.5 py-0.5 rounded-full text-xs font-medium",
+      "neutral": "bg-slate-100 text-slate-600 px-2.5 py-0.5 rounded-full text-xs font-medium"
+    }
+  },
+  "layout_strategies": {
+    "dashboard": {
+      "type": "Bento Grid",
+      "structure": "Sidebar navigation (fixed left) + Main Content Area (scrollable).",
+      "grid_logic": "grid-cols-1 md:grid-cols-3 gap-6. Hero stats span 3 cols on mobile, 1 col on desktop. Activity feed spans vertical rows."
+    },
+    "landing_page": {
+      "hero": "Asymmetrical split. Text left (60%), Image right (40%) with floating decorative elements (earnings cards).",
+      "features": "Zig-zag layout (Text-Image, Image-Text) to guide reading flow.",
+      "pricing": "3-column grid. Middle card ('Premium') scaled up 1.05x with a border-blue-500 highlight."
+    }
+  },
+  "assets": {
+    "images": {
+      "hero_main": "https://images.unsplash.com/photo-1770871820934-daf713c304af?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjAxODF8MHwxfHNlYXJjaHwxfHxoYXBweSUyMHBlcnNvbiUyMGhvbGRpbmclMjBwaG9uZSUyMHN1Y2Nlc3MlMjBtb25leXxlbnwwfHx8fDE3NzMyNzczMDZ8MA&ixlib=rb-4.1.0&q=85",
+      "content_creator": "https://images.unsplash.com/photo-1758273239210-59fea02475eb?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2NjZ8MHwxfHNlYXJjaHwxfHxzb2NpYWwlMjBtZWRpYSUyMGNvbnRlbnQlMjBjcmVhdG9yJTIwdmlkZW98ZW58MHx8fHwxNzczMjc3MzA3fDA&ixlib=rb-4.1.0&q=85",
+      "abstract_bg": "https://images.unsplash.com/photo-1760260102924-5792500d9e83?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjAzMzV8MHwxfHNlYXJjaHwzfHxtb2Rlcm4lMjBhYnN0cmFjdCUyMHRlY2hub2xvZ3klMjBiYWNrZ3JvdW5kJTIwbGlnaHQlMjBibHVlfGVufDB8fHx8MTc3MzI3NzMwOHww&ixlib=rb-4.1.0&q=85",
+      "testimonials": [
+        "https://images.unsplash.com/photo-1645951252284-4aa663bf59ca?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA1ODR8MHwxfHNlYXJjaHwxfHxkaXZlcnNlJTIwcHJvZmVzc2lvbmFsJTIwcHJvZmlsZSUyMHBvcnRyYWl0c3xlbnwwfHx8fDE3NzMyNzczMDh8MA&ixlib=rb-4.1.0&q=85",
+        "https://images.pexels.com/photos/29852895/pexels-photo-29852895.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
+        "https://images.unsplash.com/photo-1602566356438-dd36d35e989c?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA1ODR8MHwxfHNlYXJjaHw0fHxkaXZlcnNlJTIwcHJvZmVzc2lvbmFsJTIwcHJvZmlsZSUyMHBvcnRyYWl0c3xlbnwwfHx8fDE3NzMyNzczMDh8MA&ixlib=rb-4.1.0&q=85"
+      ]
+    },
+    "icons": "Use 'lucide-react' for all UI icons. Use 'solar-icons' (via iconify or similar if available, otherwise fallback to Lucide with rounded style) as requested."
+  },
+  "instructions_to_main_agent": {
+    "step_1": "Setup Tailwind config with the brand colors (blue-500, orange-500) and fonts (Manrope, Inter).",
+    "step_2": "Create the base layout components: Sidebar, Topbar, and DashboardWrapper.",
+    "step_3": "Build the 'Auth' pages first. Make them beautiful - split screen with the abstract background on one side and form on the other.",
+    "step_4": "Implement the Dashboard 'Bento' grid. Use the stat cards with icons on the right and big numbers on the left.",
+    "step_5": "Ensure all interactive elements have hover states defined in the components section.",
+    "step_6": "Use the provided image URLs for the landing page hero and features section.",
+    "critical": "Do not use default shadcn cards without adding the specific border/shadow styling defined in 'surface_strategy'. The app must look crisp and light."
+  },
+  "UNIVERSAL_GUIDELINES": [
+    "Always use 'rounded-2xl' for cards and 'rounded-xl' for buttons.",
+    "Never use pure black (#000000). Use slate-900 (#0f172a).",
+    "Add 'data-testid' to all buttons and inputs.",
+    "Use 'sonner' for notifications.",
+    "Ensure the dashboard is responsive: Sidebar becomes a drawer on mobile."
+  ]
+}
