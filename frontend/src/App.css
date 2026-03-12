@@ -1,34 +1,52 @@
-.App-logo {
-    height: 40vmin;
-    pointer-events: none;
+/* App.css - Additional Styles */
+
+/* Ensure smooth scrolling */
+html {
+  scroll-behavior: smooth;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-    .App-logo {
-        animation: App-logo-spin infinite 20s linear;
-    }
+/* App wrapper */
+#root {
+  min-height: 100vh;
 }
 
-.App-header {
-    background-color: #0f0f10;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    font-size: calc(10px + 2vmin);
-    color: white;
+/* Focus states for accessibility */
+*:focus-visible {
+  outline: 2px solid #3B82F6;
+  outline-offset: 2px;
 }
 
-.App-link {
-    color: #61dafb;
+/* Remove default button focus */
+button:focus {
+  outline: none;
 }
 
-@keyframes App-logo-spin {
-    from {
-        transform: rotate(0deg);
-    }
-    to {
-        transform: rotate(360deg);
-    }
+/* Transition classes */
+.transition-base {
+  transition: all 0.2s ease;
+}
+
+/* Link underline animation */
+.link-hover {
+  position: relative;
+}
+
+.link-hover::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background-color: currentColor;
+  transition: width 0.2s ease;
+}
+
+.link-hover:hover::after {
+  width: 100%;
+}
+
+/* Number formatting */
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
 }
