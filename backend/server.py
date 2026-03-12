@@ -42,6 +42,7 @@ class UserCreate(BaseModel):
     email: EmailStr
     password: str
     referral_code: str
+    mobile: Optional[str] = None
 
 class UserLogin(BaseModel):
     email: EmailStr
@@ -436,6 +437,7 @@ async def signup(data: UserCreate, background_tasks: BackgroundTasks):
         "id": user_id,
         "name": data.name,
         "email": data.email,
+        "mobile": data.mobile,
         "password": hash_password(data.password),
         "referral_code": generate_referral_code(data.name),
         "referred_by": data.referral_code,

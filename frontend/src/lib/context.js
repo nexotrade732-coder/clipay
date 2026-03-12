@@ -66,12 +66,13 @@ export const AuthProvider = ({ children }) => {
     return res.data.user;
   };
 
-  const signup = async (name, email, password, referralCode) => {
+  const signup = async (name, email, password, referralCode, mobile) => {
     const res = await api.post('/auth/signup', { 
       name, 
       email, 
       password, 
-      referral_code: referralCode 
+      referral_code: referralCode,
+      mobile
     });
     localStorage.setItem('clipay_token', res.data.token);
     localStorage.setItem('clipay_user', JSON.stringify(res.data.user));

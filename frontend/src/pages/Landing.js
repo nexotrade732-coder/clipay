@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth, api } from '@/lib/context';
 import { Play, Package, Users, ArrowRight, Star, Check, Shield, Zap, Globe, TrendingUp, Sparkles, ChevronRight } from 'lucide-react';
 
-const LOGO_URL = "https://customer-assets.emergentagent.com/job_4a166503-bc53-49ed-ab97-fc691e864fef/artifacts/2wqdbjxc_WhatsApp%20Image%202026-03-12%20at%204.43.20%20AM.jpeg";
+const LOGO_URL = "https://customer-assets.emergentagent.com/job_7a7ddfe3-1bcc-44e3-8f6f-b4e056ab769d/artifacts/y7efvap2_Gemini_Generated_Image_i21q2mi21q2mi21q.png";
 
 const LandingPage = () => {
   const { user } = useAuth();
@@ -22,12 +22,12 @@ const LandingPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 relative overflow-hidden" data-testid="landing-page">
+    <div className="min-h-screen relative overflow-hidden" data-testid="landing-page">
       {/* Animated Background Effects */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-0 left-1/4 w-[600px] h-[600px] bg-blue-500/10 rounded-full blur-[120px] animate-pulse"></div>
+        <div className="absolute top-0 left-1/4 w-[600px] h-[600px] bg-cyan-500/10 rounded-full blur-[120px] animate-pulse"></div>
         <div className="absolute bottom-0 right-1/4 w-[500px] h-[500px] bg-orange-500/10 rounded-full blur-[100px] animate-pulse" style={{animationDelay: '1s'}}></div>
-        <div className="absolute top-1/2 left-1/2 w-[400px] h-[400px] bg-purple-500/5 rounded-full blur-[80px] animate-pulse" style={{animationDelay: '2s'}}></div>
+        <div className="absolute top-1/2 left-1/2 w-[400px] h-[400px] bg-teal-500/5 rounded-full blur-[80px] animate-pulse" style={{animationDelay: '2s'}}></div>
         {/* Grid pattern */}
         <div className="absolute inset-0 grid-bg opacity-30"></div>
       </div>
@@ -39,8 +39,8 @@ const LandingPage = () => {
             <div className="flex items-center justify-between h-20">
               <Link to="/" className="flex items-center gap-3 group">
                 <div className="relative">
-                  <div className="absolute inset-0 bg-blue-500/20 rounded-xl blur-xl group-hover:bg-blue-500/30 transition-all"></div>
-                  <img src={LOGO_URL} alt="CLIPAY" className="h-12 w-auto relative" />
+                  <div className="absolute inset-0 bg-cyan-500/20 rounded-xl blur-xl group-hover:bg-cyan-500/30 transition-all"></div>
+                  <img src={LOGO_URL} alt="CLIPAY" className="h-14 w-auto relative" />
                 </div>
               </Link>
               <div className="flex items-center gap-4">

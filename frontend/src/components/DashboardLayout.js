@@ -6,7 +6,7 @@ import {
   Users, Award, History, Settings, LogOut, Menu, X, User, ChevronRight, Sparkles
 } from 'lucide-react';
 
-const LOGO_URL = "https://customer-assets.emergentagent.com/job_4a166503-bc53-49ed-ab97-fc691e864fef/artifacts/2wqdbjxc_WhatsApp%20Image%202026-03-12%20at%204.43.20%20AM.jpeg";
+const LOGO_URL = "https://customer-assets.emergentagent.com/job_7a7ddfe3-1bcc-44e3-8f6f-b4e056ab769d/artifacts/y7efvap2_Gemini_Generated_Image_i21q2mi21q2mi21q.png";
 
 const userNavItems = [
   { path: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -47,11 +47,11 @@ const DashboardLayout = ({ children, isAdmin = false }) => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 flex relative" data-testid="dashboard-layout">
+    <div className="min-h-screen flex relative" data-testid="dashboard-layout">
       {/* Background Effects */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-0 right-1/4 w-[500px] h-[500px] bg-blue-500/5 rounded-full blur-[120px]"></div>
-        <div className="absolute bottom-0 left-1/4 w-[400px] h-[400px] bg-purple-500/5 rounded-full blur-[100px]"></div>
+        <div className="absolute top-0 right-1/4 w-[500px] h-[500px] bg-cyan-500/5 rounded-full blur-[120px]"></div>
+        <div className="absolute bottom-0 left-1/4 w-[400px] h-[400px] bg-orange-500/5 rounded-full blur-[100px]"></div>
         <div className="absolute inset-0 grid-bg opacity-10"></div>
       </div>
 
