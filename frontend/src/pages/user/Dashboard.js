@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth, api, useToast } from '@/lib/context';
-import { Wallet, DollarSign, Users, ArrowUpRight, ArrowDownLeft, Play, Package, TrendingUp, RefreshCw } from 'lucide-react';
+import { Wallet, DollarSign, Users, ArrowUpRight, ArrowDownLeft, Play, Package, TrendingUp, Copy, Sparkles, Target, Zap } from 'lucide-react';
 
 const UserDashboard = () => {
   const { user, refreshUser } = useAuth();
@@ -25,7 +25,7 @@ const UserDashboard = () => {
 
   useEffect(() => {
     fetchData();
-    const interval = setInterval(fetchData, 30000); // Poll every 30s
+    const interval = setInterval(fetchData, 30000);
     return () => clearInterval(interval);
   }, []);
 
@@ -35,97 +35,105 @@ const UserDashboard = () => {
 
   return (
     <div className="max-w-6xl mx-auto space-y-6" data-testid="user-dashboard">
+      {/* Welcome Banner */}
+      <div className="glass rounded-3xl p-6 relative overflow-hidden animate-slideUp">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+        <div className="relative z-10">
+          <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full glass-light text-xs font-medium text-blue-400 mb-3">
+            <Sparkles className="w-3.5 h-3.5" />
+            Welcome back!
+          </span>
+          <h2 className="text-2xl font-bold text-white mb-1">Hello, {user?.name?.split(' ')[0]} 👋</h2>
+          <p className="text-slate-400 text-sm">Ready to earn? Let's check your progress today.</p>
+        </div>
+      </div>
+
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Balance */}
-        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm card-hover relative overflow-hidden group">
-          <div className="absolute -right-4 -top-4 w-24 h-24 bg-blue-50 rounded-full blur-2xl group-hover:bg-blue-100 transition-colors"></div>
-          <div className="flex justify-between items-start relative">
-            <div>
-              <p className="text-sm font-medium text-slate-500">Current Balance</p>
-              <h3 className="text-2xl font-bold text-slate-900 mt-1" data-testid="balance-value">
-                ${user?.balance?.toFixed(2) || '0.00'}
-              </h3>
+        <div className="glass rounded-2xl p-5 card-hover group animate-slideUp stagger-1">
+          <div className="flex justify-between items-start mb-4">
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500/20 to-blue-600/20 border border-blue-500/20 flex items-center justify-center group-hover:scale-110 transition-transform">
+              <Wallet className="w-6 h-6 text-blue-400" />
             </div>
-            <div className="w-10 h-10 rounded-full bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-600">
-              <Wallet className="w-5 h-5" />
-            </div>
+            <span className="badge-success">Active</span>
           </div>
-          <div className="mt-4 flex items-center text-xs font-medium text-emerald-600">
-            <TrendingUp className="w-3.5 h-3.5 mr-1" />
+          <p className="text-xs font-medium text-slate-400 uppercase tracking-wider mb-1">Balance</p>
+          <h3 className="text-2xl font-bold text-white" data-testid="balance-value">
+            ${user?.balance?.toFixed(2) || '0.00'}
+          </h3>
+          <div className="mt-3 flex items-center gap-1 text-xs text-emerald-400">
+            <TrendingUp className="w-3.5 h-3.5" />
             +${progress.earnings_today?.toFixed(2) || '0.00'} today
           </div>
         </div>
 
         {/* Total Earnings */}
-        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm card-hover">
-          <div className="flex justify-between items-start">
-            <div>
-              <p className="text-sm font-medium text-slate-500">Total Earnings</p>
-              <h3 className="text-2xl font-bold text-slate-900 mt-1" data-testid="earnings-value">
-                ${user?.total_earnings?.toFixed(2) || '0.00'}
-              </h3>
-            </div>
-            <div className="w-10 h-10 rounded-full bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-600">
-              <DollarSign className="w-5 h-5" />
+        <div className="glass rounded-2xl p-5 card-hover group animate-slideUp stagger-2">
+          <div className="flex justify-between items-start mb-4">
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500/20 to-emerald-600/20 border border-emerald-500/20 flex items-center justify-center group-hover:scale-110 transition-transform">
+              <DollarSign className="w-6 h-6 text-emerald-400" />
             </div>
           </div>
-          <div className="mt-4 text-xs text-slate-500">Lifetime platform earnings</div>
+          <p className="text-xs font-medium text-slate-400 uppercase tracking-wider mb-1">Earnings</p>
+          <h3 className="text-2xl font-bold text-white" data-testid="earnings-value">
+            ${user?.total_earnings?.toFixed(2) || '0.00'}
+          </h3>
+          <p className="mt-3 text-xs text-slate-500">Lifetime total</p>
         </div>
 
         {/* Total Withdrawn */}
-        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm card-hover">
-          <div className="flex justify-between items-start">
-            <div>
-              <p className="text-sm font-medium text-slate-500">Total Withdrawn</p>
-              <h3 className="text-2xl font-bold text-slate-900 mt-1" data-testid="withdrawn-value">
-                ${user?.total_withdrawn?.toFixed(2) || '0.00'}
-              </h3>
-            </div>
-            <div className="w-10 h-10 rounded-full bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-600">
-              <ArrowUpRight className="w-5 h-5" />
+        <div className="glass rounded-2xl p-5 card-hover group animate-slideUp stagger-3">
+          <div className="flex justify-between items-start mb-4">
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500/20 to-purple-600/20 border border-purple-500/20 flex items-center justify-center group-hover:scale-110 transition-transform">
+              <ArrowUpRight className="w-6 h-6 text-purple-400" />
             </div>
           </div>
-          <div className="mt-4 text-xs text-slate-500">Successfully processed</div>
+          <p className="text-xs font-medium text-slate-400 uppercase tracking-wider mb-1">Withdrawn</p>
+          <h3 className="text-2xl font-bold text-white" data-testid="withdrawn-value">
+            ${user?.total_withdrawn?.toFixed(2) || '0.00'}
+          </h3>
+          <p className="mt-3 text-xs text-slate-500">Processed payouts</p>
         </div>
 
-        {/* Network Team */}
-        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm card-hover">
-          <div className="flex justify-between items-start">
-            <div>
-              <p className="text-sm font-medium text-slate-500">Current Rank</p>
-              <h3 className="text-2xl font-bold text-slate-900 mt-1" data-testid="rank-value">
-                {user?.rank || 'None'}
-              </h3>
-            </div>
-            <div className="w-10 h-10 rounded-full bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-600">
-              <Users className="w-5 h-5" />
+        {/* Rank */}
+        <div className="glass rounded-2xl p-5 card-hover group animate-slideUp stagger-4">
+          <div className="flex justify-between items-start mb-4">
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-orange-500/20 to-orange-600/20 border border-orange-500/20 flex items-center justify-center group-hover:scale-110 transition-transform">
+              <Target className="w-6 h-6 text-orange-400" />
             </div>
           </div>
-          <Link to="/ranks" className="mt-4 text-xs text-blue-500 hover:text-blue-600 font-medium">
+          <p className="text-xs font-medium text-slate-400 uppercase tracking-wider mb-1">Rank</p>
+          <h3 className="text-2xl font-bold text-white" data-testid="rank-value">
+            {user?.rank || 'None'}
+          </h3>
+          <Link to="/ranks" className="mt-3 text-xs text-blue-400 hover:text-blue-300 transition-colors">
             View progress →
           </Link>
         </div>
       </div>
 
       {/* Main Content */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid lg:grid-cols-3 gap-6">
         {/* Today's Activity */}
-        <div className="lg:col-span-2 bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
+        <div className="lg:col-span-2 glass rounded-3xl p-6 animate-slideUp stagger-5">
           <div className="flex justify-between items-center mb-6">
-            <h3 className="text-lg font-semibold text-slate-900">Today's Activity</h3>
-            <Link to="/watch" className="text-sm font-medium text-blue-500 hover:text-blue-600 flex items-center gap-1">
+            <div>
+              <h3 className="text-lg font-semibold text-white">Today's Activity</h3>
+              <p className="text-xs text-slate-400 mt-1">Track your daily progress</p>
+            </div>
+            <Link to="/watch" className="btn-primary text-sm px-4 py-2 flex items-center gap-2">
               Watch Links <ArrowUpRight className="w-4 h-4" />
             </Link>
           </div>
 
           {user?.active_package ? (
-            <div className="bg-slate-50 rounded-xl p-5 border border-slate-100 flex flex-col sm:flex-row items-center gap-6">
+            <div className="glass-light rounded-2xl p-6 flex flex-col sm:flex-row items-center gap-6">
               {/* Progress Circle */}
-              <div className="relative w-24 h-24 flex-shrink-0 flex items-center justify-center">
+              <div className="relative w-32 h-32 flex-shrink-0 flex items-center justify-center">
                 <svg className="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
                   <path
-                    className="text-slate-200"
+                    className="text-slate-700"
                     strokeWidth="3"
                     stroke="currentColor"
                     fill="none"
@@ -139,47 +147,46 @@ const UserDashboard = () => {
                     stroke="currentColor"
                     fill="none"
                     d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                    style={{ filter: 'drop-shadow(0 0 6px rgba(59, 130, 246, 0.5))' }}
                   />
                 </svg>
                 <div className="absolute flex flex-col items-center justify-center">
-                  <span className="text-xl font-bold text-slate-900">
-                    {progress.watched_today}<span className="text-sm text-slate-400">/{progress.daily_quota}</span>
+                  <span className="text-2xl font-bold text-white">
+                    {progress.watched_today}
                   </span>
+                  <span className="text-xs text-slate-400">of {progress.daily_quota}</span>
                 </div>
               </div>
 
               <div className="flex-1 text-center sm:text-left">
-                <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-amber-50 text-amber-700 text-xs font-medium border border-amber-200/50 mb-2">
-                  <Package className="w-3.5 h-3.5" />
+                <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-gradient-to-r from-orange-500/20 to-amber-500/20 border border-orange-500/30 text-orange-300 text-xs font-semibold mb-3">
+                  <Zap className="w-3.5 h-3.5" />
                   {user.active_package} Package
-                </div>
-                <h4 className="text-base font-medium text-slate-900 mb-1">
-                  {progress.watched_today >= progress.daily_quota ? "Daily quota completed!" : "You're making progress!"}
+                </span>
+                <h4 className="text-lg font-semibold text-white mb-2">
+                  {progress.watched_today >= progress.daily_quota ? "Daily quota completed! 🎉" : "Keep going!"}
                 </h4>
-                <p className="text-sm text-slate-500 mb-4">
+                <p className="text-sm text-slate-400 mb-4">
                   {progress.watched_today >= progress.daily_quota 
-                    ? "Come back tomorrow for more earnings." 
-                    : `Watch ${progress.daily_quota - progress.watched_today} more videos to complete your quota.`}
+                    ? "Great job! Come back tomorrow for more earnings." 
+                    : `Watch ${progress.daily_quota - progress.watched_today} more videos to complete today's quota.`}
                 </p>
-                <Link
-                  to="/watch"
-                  className="inline-flex items-center gap-2 bg-slate-900 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-slate-800 transition-colors shadow-sm"
-                  data-testid="continue-watching-btn"
-                >
-                  {progress.watched_today >= progress.daily_quota ? 'View History' : 'Continue Watching'}
-                </Link>
+                <div className="flex items-center gap-4">
+                  <div className="px-4 py-2 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
+                    <span className="text-emerald-400 font-bold">${progress.earnings_today?.toFixed(2)}</span>
+                    <span className="text-xs text-slate-400 ml-1">earned today</span>
+                  </div>
+                </div>
               </div>
             </div>
           ) : (
-            <div className="bg-slate-50 rounded-xl p-6 border border-slate-100 text-center">
-              <Package className="w-12 h-12 text-slate-400 mx-auto mb-4" />
-              <h4 className="text-lg font-medium text-slate-900 mb-2">No Active Package</h4>
-              <p className="text-sm text-slate-500 mb-4">Purchase a package to start earning from watching videos.</p>
-              <Link
-                to="/packages"
-                className="inline-flex items-center gap-2 bg-blue-500 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-blue-600 transition-colors"
-                data-testid="get-package-btn"
-              >
+            <div className="glass-light rounded-2xl p-8 text-center">
+              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500/20 to-purple-500/20 border border-blue-500/20 flex items-center justify-center mx-auto mb-4">
+                <Package className="w-8 h-8 text-blue-400" />
+              </div>
+              <h4 className="text-lg font-semibold text-white mb-2">No Active Package</h4>
+              <p className="text-sm text-slate-400 mb-6">Purchase a package to start earning from watching videos.</p>
+              <Link to="/packages" className="btn-primary inline-flex items-center gap-2" data-testid="get-package-btn">
                 Get a Package
               </Link>
             </div>
@@ -187,69 +194,85 @@ const UserDashboard = () => {
         </div>
 
         {/* Quick Actions */}
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 flex flex-col">
-          <h3 className="text-lg font-semibold text-slate-900 mb-4">Quick Actions</h3>
-          <div className="grid grid-cols-2 gap-3 flex-1">
+        <div className="glass rounded-3xl p-6 animate-slideUp stagger-5">
+          <h3 className="text-lg font-semibold text-white mb-4">Quick Actions</h3>
+          <div className="grid grid-cols-2 gap-3">
             <Link
               to="/deposit"
-              className="flex flex-col items-center justify-center gap-2 bg-slate-50 border border-slate-100 rounded-xl p-4 hover:bg-slate-100 hover:border-slate-200 transition-all text-slate-600 hover:text-slate-900"
+              className="glass-light rounded-xl p-4 flex flex-col items-center gap-2 hover:bg-white/10 transition-all group"
               data-testid="quick-deposit-btn"
             >
-              <ArrowDownLeft className="w-6 h-6" />
-              <span className="text-sm font-medium">Deposit</span>
+              <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center group-hover:scale-110 transition-transform">
+                <ArrowDownLeft className="w-5 h-5 text-emerald-400" />
+              </div>
+              <span className="text-sm font-medium text-slate-300">Deposit</span>
             </Link>
             <Link
               to="/withdraw"
-              className="flex flex-col items-center justify-center gap-2 bg-slate-50 border border-slate-100 rounded-xl p-4 hover:bg-slate-100 hover:border-slate-200 transition-all text-slate-600 hover:text-slate-900"
+              className="glass-light rounded-xl p-4 flex flex-col items-center gap-2 hover:bg-white/10 transition-all group"
               data-testid="quick-withdraw-btn"
             >
-              <ArrowUpRight className="w-6 h-6" />
-              <span className="text-sm font-medium">Withdraw</span>
+              <div className="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center group-hover:scale-110 transition-transform">
+                <ArrowUpRight className="w-5 h-5 text-purple-400" />
+              </div>
+              <span className="text-sm font-medium text-slate-300">Withdraw</span>
             </Link>
             <Link
               to="/referrals"
-              className="flex flex-col items-center justify-center gap-2 bg-slate-50 border border-slate-100 rounded-xl p-4 hover:bg-slate-100 hover:border-slate-200 transition-all text-slate-600 hover:text-slate-900"
+              className="glass-light rounded-xl p-4 flex flex-col items-center gap-2 hover:bg-white/10 transition-all group"
               data-testid="quick-team-btn"
             >
-              <Users className="w-6 h-6" />
-              <span className="text-sm font-medium">Team</span>
+              <div className="w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center group-hover:scale-110 transition-transform">
+                <Users className="w-5 h-5 text-blue-400" />
+              </div>
+              <span className="text-sm font-medium text-slate-300">Team</span>
             </Link>
             <Link
               to="/packages"
-              className="flex flex-col items-center justify-center gap-2 bg-slate-50 border border-slate-100 rounded-xl p-4 hover:bg-slate-100 hover:border-slate-200 transition-all text-slate-600 hover:text-slate-900"
+              className="glass-light rounded-xl p-4 flex flex-col items-center gap-2 hover:bg-white/10 transition-all group"
               data-testid="quick-upgrade-btn"
             >
-              <Package className="w-6 h-6" />
-              <span className="text-sm font-medium">Upgrade</span>
+              <div className="w-10 h-10 rounded-xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-center group-hover:scale-110 transition-transform">
+                <Package className="w-5 h-5 text-orange-400" />
+              </div>
+              <span className="text-sm font-medium text-slate-300">Upgrade</span>
             </Link>
           </div>
         </div>
       </div>
 
       {/* Referral Code */}
-      <div className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-2xl p-6 text-white relative overflow-hidden">
-        <div className="absolute right-0 top-0 w-64 h-64 bg-white/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3"></div>
-        <div className="relative z-10">
-          <h3 className="text-lg font-semibold mb-2">Your Referral Code</h3>
-          <p className="text-slate-300 text-sm mb-4">Share this code to invite new members and earn commissions.</p>
-          <div className="flex flex-col sm:flex-row gap-3 max-w-xl">
-            <input
-              type="text"
-              value={user?.referral_code || ''}
-              readOnly
-              className="flex-1 bg-white/10 border border-white/20 text-white text-sm rounded-xl px-4 py-2.5 outline-none"
-              data-testid="referral-code-input"
-            />
-            <button
-              onClick={() => {
-                navigator.clipboard.writeText(user?.referral_code || '');
-                toast.success('Referral code copied!');
-              }}
-              className="bg-blue-500 hover:bg-blue-600 px-4 py-2.5 rounded-xl text-sm font-medium transition-colors flex items-center justify-center gap-2"
-              data-testid="copy-referral-btn"
-            >
-              Copy Code
-            </button>
+      <div className="relative rounded-3xl overflow-hidden animate-slideUp">
+        <div className="absolute inset-0 bg-gradient-to-r from-blue-600 via-purple-600 to-blue-600 opacity-90"></div>
+        <div className="absolute inset-0 grid-bg opacity-20"></div>
+        <div className="relative p-6 sm:p-8">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+            <div>
+              <h3 className="text-xl font-bold text-white mb-2">Share & Earn Commission</h3>
+              <p className="text-blue-100 text-sm max-w-lg">
+                Invite friends using your referral code and earn up to 22% commission across 3 levels.
+              </p>
+            </div>
+            <div className="flex flex-col sm:flex-row gap-3">
+              <input
+                type="text"
+                value={user?.referral_code || ''}
+                readOnly
+                className="bg-white/10 border border-white/20 text-white text-sm rounded-xl px-4 py-3 outline-none font-mono min-w-[200px]"
+                data-testid="referral-code-input"
+              />
+              <button
+                onClick={() => {
+                  navigator.clipboard.writeText(user?.referral_code || '');
+                  toast.success('Referral code copied!');
+                }}
+                className="bg-white text-slate-900 px-6 py-3 rounded-xl text-sm font-semibold hover:bg-slate-100 transition-colors flex items-center justify-center gap-2"
+                data-testid="copy-referral-btn"
+              >
+                <Copy className="w-4 h-4" />
+                Copy Code
+              </button>
+            </div>
           </div>
         </div>
       </div>

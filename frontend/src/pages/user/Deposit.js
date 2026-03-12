@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { api, useToast } from '@/lib/context';
-import { Loader2, Copy, AlertCircle } from 'lucide-react';
+import { Loader2, Copy, AlertCircle, ArrowDownLeft, Wallet } from 'lucide-react';
 
 const UserDeposit = () => {
   const toast = useToast();
@@ -64,25 +64,18 @@ const UserDeposit = () => {
 
   const getPaymentAddress = () => {
     switch (gateway) {
-      case 'usdt_trc20':
-        return settings?.usdt_address_trc20;
-      case 'usdt_bep20':
-        return settings?.usdt_address_bep20;
-      case 'jazzcash':
-        return settings?.jazzcash_number;
-      default:
-        return null;
+      case 'usdt_trc20': return settings?.usdt_address_trc20;
+      case 'usdt_bep20': return settings?.usdt_address_bep20;
+      case 'jazzcash': return settings?.jazzcash_number;
+      default: return null;
     }
   };
 
   const getStatusBadge = (status) => {
     switch (status) {
-      case 'approved':
-        return <span className="px-2 py-0.5 rounded text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">Approved</span>;
-      case 'rejected':
-        return <span className="px-2 py-0.5 rounded text-xs font-medium bg-red-50 text-red-700 border border-red-200">Rejected</span>;
-      default:
-        return <span className="px-2 py-0.5 rounded text-xs font-medium bg-amber-50 text-amber-700 border border-amber-200">Pending</span>;
+      case 'approved': return <span className="badge-success">Approved</span>;
+      case 'rejected': return <span className="badge-error">Rejected</span>;
+      default: return <span className="badge-warning">Pending</span>;
     }
   };
 
@@ -99,20 +92,25 @@ const UserDeposit = () => {
   return (
     <div className="max-w-3xl mx-auto space-y-6" data-testid="deposit-page">
       {/* Deposit Form */}
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 sm:p-8">
-        <div className="mb-8 pb-6 border-b border-slate-100">
-          <h2 className="text-2xl font-bold text-slate-900">Deposit Funds</h2>
-          <p className="text-sm text-slate-500 mt-1">Add funds to your account to purchase packages.</p>
+      <div className="glass rounded-3xl p-6 sm:p-8 animate-slideUp">
+        <div className="flex items-center gap-4 mb-8 pb-6 border-b border-white/10">
+          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500/20 to-emerald-600/20 border border-emerald-500/20 flex items-center justify-center">
+            <ArrowDownLeft className="w-6 h-6 text-emerald-400" />
+          </div>
+          <div>
+            <h2 className="text-xl font-bold text-white">Deposit Funds</h2>
+            <p className="text-sm text-slate-400">Add funds to purchase packages</p>
+          </div>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-5">
           {/* Gateway Selection */}
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1.5">Payment Method</label>
+            <label className="block text-sm font-medium text-slate-300 mb-2">Payment Method</label>
             <select
               value={gateway}
               onChange={(e) => setGateway(e.target.value)}
-              className="w-full bg-slate-50 border border-slate-200 text-slate-900 text-sm rounded-xl px-4 py-2.5 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all"
+              className="input-dark"
               data-testid="gateway-select"
             >
               <option value="usdt_trc20">USDT (TRC20)</option>
@@ -123,40 +121,40 @@ const UserDeposit = () => {
 
           {/* Payment Address */}
           {paymentAddress ? (
-            <div className="bg-slate-50 border border-slate-200 rounded-xl p-4">
-              <p className="text-sm font-medium text-slate-700 mb-2">
+            <div className="glass-light rounded-2xl p-4">
+              <p className="text-sm font-medium text-slate-300 mb-2">
                 {gateway === 'jazzcash' ? 'JazzCash Number' : 'Wallet Address'}
               </p>
               <div className="flex items-center gap-2">
-                <code className="flex-1 text-sm text-slate-900 bg-white px-3 py-2 rounded-lg border border-slate-200 font-mono break-all">
+                <code className="flex-1 text-sm text-white bg-slate-800/50 px-4 py-3 rounded-xl border border-white/10 font-mono break-all">
                   {paymentAddress}
                 </code>
                 <button
                   type="button"
                   onClick={() => copyToClipboard(paymentAddress)}
-                  className="p-2 bg-white border border-slate-200 rounded-lg hover:bg-slate-100 transition-colors"
+                  className="p-3 rounded-xl bg-blue-500/20 text-blue-400 border border-blue-500/30 hover:bg-blue-500/30 transition-colors"
                   data-testid="copy-address-btn"
                 >
-                  <Copy className="w-4 h-4 text-slate-600" />
+                  <Copy className="w-5 h-5" />
                 </button>
               </div>
               {gateway === 'jazzcash' && settings?.jazzcash_name && (
-                <p className="text-sm text-slate-500 mt-2">Account Name: {settings.jazzcash_name}</p>
+                <p className="text-sm text-slate-400 mt-2">Account Name: {settings.jazzcash_name}</p>
               )}
             </div>
           ) : (
-            <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 flex items-start gap-3">
-              <AlertCircle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+            <div className="glass-light rounded-2xl p-4 flex items-start gap-3 border border-amber-500/30">
+              <AlertCircle className="w-5 h-5 text-amber-400 flex-shrink-0 mt-0.5" />
               <div>
-                <p className="text-sm text-amber-700 font-medium">Payment address not configured</p>
-                <p className="text-xs text-amber-600">Please contact admin to set up payment details.</p>
+                <p className="text-sm text-amber-400 font-medium">Payment address not configured</p>
+                <p className="text-xs text-slate-400">Please contact admin to set up payment details.</p>
               </div>
             </div>
           )}
 
           {/* Amount */}
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1.5">Amount (USD)</label>
+            <label className="block text-sm font-medium text-slate-300 mb-2">Amount (USD)</label>
             <input
               type="number"
               value={amount}
@@ -164,14 +162,14 @@ const UserDeposit = () => {
               min="1"
               step="0.01"
               placeholder="100.00"
-              className="w-full bg-slate-50 border border-slate-200 text-slate-900 text-sm rounded-xl px-4 py-2.5 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all"
+              className="input-dark"
               data-testid="amount-input"
             />
           </div>
 
           {/* Transaction ID */}
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1.5">
+            <label className="block text-sm font-medium text-slate-300 mb-2">
               Transaction ID / Reference {gateway === 'jazzcash' && '(TID)'}
             </label>
             <input
@@ -179,19 +177,19 @@ const UserDeposit = () => {
               value={txid}
               onChange={(e) => setTxid(e.target.value)}
               placeholder={gateway === 'jazzcash' ? 'Enter TID from JazzCash' : 'Enter transaction hash'}
-              className="w-full bg-slate-50 border border-slate-200 text-slate-900 text-sm rounded-xl px-4 py-2.5 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all"
+              className="input-dark"
               data-testid="txid-input"
             />
-            <p className="text-xs text-slate-500 mt-1">Enter after making the payment</p>
+            <p className="text-xs text-slate-500 mt-1.5">Enter after making the payment</p>
           </div>
 
           <button
             type="submit"
             disabled={submitting || !paymentAddress}
-            className="w-full bg-slate-900 text-white font-medium rounded-xl text-sm px-5 py-3 hover:bg-slate-800 transition-colors shadow-sm mt-2 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="btn-primary w-full py-4 mt-4 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
             data-testid="submit-deposit-btn"
           >
-            {submitting && <Loader2 className="w-4 h-4 animate-spin" />}
+            {submitting && <Loader2 className="w-5 h-5 animate-spin" />}
             Submit Deposit Request
           </button>
         </form>
@@ -199,26 +197,26 @@ const UserDeposit = () => {
 
       {/* Deposit History */}
       {deposits.length > 0 && (
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-          <div className="px-6 py-5 border-b border-slate-200">
-            <h3 className="text-base font-semibold text-slate-900">Recent Deposits</h3>
+        <div className="glass rounded-3xl overflow-hidden animate-slideUp">
+          <div className="px-6 py-5 border-b border-white/10">
+            <h3 className="text-lg font-semibold text-white">Recent Deposits</h3>
           </div>
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm text-slate-600">
-              <thead className="bg-slate-50 text-xs uppercase text-slate-500 font-medium border-b border-slate-200">
+            <table className="w-full text-left text-sm">
+              <thead className="bg-slate-800/50 text-xs uppercase text-slate-400 font-medium border-b border-white/5">
                 <tr>
-                  <th className="px-6 py-3">Date</th>
-                  <th className="px-6 py-3">Amount</th>
-                  <th className="px-6 py-3">Gateway</th>
-                  <th className="px-6 py-3">Status</th>
+                  <th className="px-6 py-4">Date</th>
+                  <th className="px-6 py-4">Amount</th>
+                  <th className="px-6 py-4">Gateway</th>
+                  <th className="px-6 py-4">Status</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody className="divide-y divide-white/5">
                 {deposits.slice(0, 5).map((deposit) => (
-                  <tr key={deposit.id} className="hover:bg-slate-50/50">
-                    <td className="px-6 py-4">{new Date(deposit.created_at).toLocaleDateString()}</td>
-                    <td className="px-6 py-4 font-medium text-slate-900">${deposit.amount.toFixed(2)}</td>
-                    <td className="px-6 py-4">{deposit.gateway}</td>
+                  <tr key={deposit.id} className="hover:bg-white/5 transition-colors">
+                    <td className="px-6 py-4 text-slate-300">{new Date(deposit.created_at).toLocaleDateString()}</td>
+                    <td className="px-6 py-4 font-medium text-white">${deposit.amount.toFixed(2)}</td>
+                    <td className="px-6 py-4 text-slate-300">{deposit.gateway}</td>
                     <td className="px-6 py-4">{getStatusBadge(deposit.status)}</td>
                   </tr>
                 ))}

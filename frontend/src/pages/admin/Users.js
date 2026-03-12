@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { api, useToast } from '@/lib/context';
-import { Loader2, Search, Edit, Trash2, X, Ban, Check } from 'lucide-react';
+import { Loader2, Search, Edit, Trash2, X, Ban, Check, Users, Shield } from 'lucide-react';
 
 const AdminUsers = () => {
   const toast = useToast();
@@ -83,76 +83,81 @@ const AdminUsers = () => {
   return (
     <div className="max-w-7xl mx-auto space-y-6" data-testid="admin-users-page">
       {/* Header */}
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-        <div className="px-6 py-5 border-b border-slate-200 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <h3 className="text-lg font-semibold text-slate-900">User Management</h3>
+      <div className="glass rounded-3xl overflow-hidden animate-slideUp">
+        <div className="px-6 py-5 border-b border-white/10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-blue-500/20 border border-blue-500/30 flex items-center justify-center">
+              <Users className="w-5 h-5 text-blue-400" />
+            </div>
+            <h3 className="text-lg font-semibold text-white">User Management</h3>
+          </div>
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
             <input
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search users..."
-              className="pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 text-sm rounded-xl outline-none focus:border-blue-500 w-full sm:w-64"
+              className="input-dark pl-11 w-full sm:w-64"
               data-testid="search-users-input"
             />
           </div>
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm text-slate-600">
-            <thead className="bg-slate-50 text-xs uppercase text-slate-500 font-medium border-b border-slate-200">
+          <table className="w-full text-left text-sm">
+            <thead className="bg-slate-800/50 text-xs uppercase text-slate-400 font-medium border-b border-white/5">
               <tr>
-                <th className="px-6 py-3">User</th>
-                <th className="px-6 py-3">Email</th>
-                <th className="px-6 py-3">Package</th>
-                <th className="px-6 py-3">Balance</th>
-                <th className="px-6 py-3">Status</th>
-                <th className="px-6 py-3 text-right">Actions</th>
+                <th className="px-6 py-4">User</th>
+                <th className="px-6 py-4">Email</th>
+                <th className="px-6 py-4">Package</th>
+                <th className="px-6 py-4">Balance</th>
+                <th className="px-6 py-4">Status</th>
+                <th className="px-6 py-4 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-white/5">
               {filteredUsers.map((user) => (
-                <tr key={user.id} className="hover:bg-slate-50/50">
-                  <td className="px-6 py-4 font-medium text-slate-900">{user.name}</td>
-                  <td className="px-6 py-4">{user.email}</td>
+                <tr key={user.id} className="hover:bg-white/5 transition-colors">
+                  <td className="px-6 py-4 font-medium text-white">{user.name}</td>
+                  <td className="px-6 py-4 text-slate-300">{user.email}</td>
                   <td className="px-6 py-4">
                     {user.active_package ? (
-                      <span className="px-2 py-0.5 rounded text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200">
-                        {user.active_package}
-                      </span>
+                      <span className="badge-info">{user.active_package}</span>
                     ) : (
-                      <span className="text-slate-400">None</span>
+                      <span className="text-slate-500">None</span>
                     )}
                   </td>
-                  <td className="px-6 py-4 font-medium">${user.balance?.toFixed(2)}</td>
+                  <td className="px-6 py-4 font-medium text-white">${user.balance?.toFixed(2)}</td>
                   <td className="px-6 py-4">
                     {user.is_blocked ? (
-                      <span className="px-2 py-0.5 rounded text-xs font-medium bg-red-50 text-red-700 border border-red-200">Blocked</span>
+                      <span className="badge-error">Blocked</span>
                     ) : (
-                      <span className="px-2 py-0.5 rounded text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">Active</span>
+                      <span className="badge-success">Active</span>
                     )}
                   </td>
-                  <td className="px-6 py-4 text-right space-x-2">
-                    <button
-                      onClick={() => handleEdit(user)}
-                      className="text-blue-500 hover:text-blue-700 p-1"
-                      data-testid={`edit-user-${user.id}`}
-                    >
-                      <Edit className="w-4 h-4" />
-                    </button>
-                    <button
-                      onClick={() => handleToggleBlock(user)}
-                      className={`p-1 ${user.is_blocked ? 'text-emerald-500 hover:text-emerald-700' : 'text-amber-500 hover:text-amber-700'}`}
-                    >
-                      {user.is_blocked ? <Check className="w-4 h-4" /> : <Ban className="w-4 h-4" />}
-                    </button>
-                    <button
-                      onClick={() => handleDelete(user)}
-                      className="text-red-500 hover:text-red-700 p-1"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
+                  <td className="px-6 py-4 text-right">
+                    <div className="flex items-center justify-end gap-2">
+                      <button
+                        onClick={() => handleEdit(user)}
+                        className="p-2 rounded-lg bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 transition-colors"
+                        data-testid={`edit-user-${user.id}`}
+                      >
+                        <Edit className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => handleToggleBlock(user)}
+                        className={`p-2 rounded-lg transition-colors ${user.is_blocked ? 'bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20' : 'bg-amber-500/10 text-amber-400 hover:bg-amber-500/20'}`}
+                      >
+                        {user.is_blocked ? <Check className="w-4 h-4" /> : <Ban className="w-4 h-4" />}
+                      </button>
+                      <button
+                        onClick={() => handleDelete(user)}
+                        className="p-2 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-colors"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -163,56 +168,56 @@ const AdminUsers = () => {
 
       {/* Edit Modal */}
       {editModal && (
-        <div className="fixed inset-0 bg-slate-900/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl p-6 w-full max-w-md animate-slideUp">
+        <div className="fixed inset-0 modal-backdrop flex items-center justify-center z-50 p-4">
+          <div className="glass rounded-3xl p-6 w-full max-w-md animate-scaleIn">
             <div className="flex items-center justify-between mb-6">
-              <h3 className="text-lg font-semibold text-slate-900">Edit User</h3>
-              <button onClick={() => setEditModal(null)} className="p-1 hover:bg-slate-100 rounded-lg">
-                <X className="w-5 h-5 text-slate-500" />
+              <h3 className="text-lg font-semibold text-white">Edit User</h3>
+              <button onClick={() => setEditModal(null)} className="p-2 hover:bg-white/10 rounded-xl transition-colors">
+                <X className="w-5 h-5 text-slate-400" />
               </button>
             </div>
             
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">Name</label>
+                <label className="block text-sm font-medium text-slate-300 mb-2">Name</label>
                 <input
                   type="text"
                   value={editData.name}
                   onChange={(e) => setEditData(prev => ({ ...prev, name: e.target.value }))}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-blue-500"
+                  className="input-dark"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">Balance</label>
+                <label className="block text-sm font-medium text-slate-300 mb-2">Balance</label>
                 <input
                   type="number"
                   value={editData.balance}
                   onChange={(e) => setEditData(prev => ({ ...prev, balance: parseFloat(e.target.value) }))}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-blue-500"
+                  className="input-dark"
                 />
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-3">
                 <input
                   type="checkbox"
                   id="is_blocked"
                   checked={editData.is_blocked}
                   onChange={(e) => setEditData(prev => ({ ...prev, is_blocked: e.target.checked }))}
-                  className="w-4 h-4"
+                  className="w-4 h-4 rounded"
                 />
-                <label htmlFor="is_blocked" className="text-sm text-slate-700">Block User</label>
+                <label htmlFor="is_blocked" className="text-sm text-slate-300">Block User</label>
               </div>
             </div>
 
             <div className="flex gap-3 mt-6">
               <button
                 onClick={() => setEditModal(null)}
-                className="flex-1 px-4 py-2.5 border border-slate-200 text-slate-700 rounded-xl text-sm font-medium hover:bg-slate-50"
+                className="btn-secondary flex-1"
               >
                 Cancel
               </button>
               <button
                 onClick={handleSaveEdit}
-                className="flex-1 px-4 py-2.5 bg-blue-500 text-white rounded-xl text-sm font-medium hover:bg-blue-600"
+                className="btn-primary flex-1"
               >
                 Save Changes
               </button>

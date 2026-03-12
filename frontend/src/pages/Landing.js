@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth, api } from '@/lib/context';
-import { Play, Package, Users, ArrowRight, Star, Check, Shield, Zap, Globe } from 'lucide-react';
+import { Play, Package, Users, ArrowRight, Star, Check, Shield, Zap, Globe, TrendingUp, Sparkles, ChevronRight } from 'lucide-react';
 
 const LOGO_URL = "https://customer-assets.emergentagent.com/job_4a166503-bc53-49ed-ab97-fc691e864fef/artifacts/2wqdbjxc_WhatsApp%20Image%202026-03-12%20at%204.43.20%20AM.jpeg";
 
@@ -10,7 +10,6 @@ const LandingPage = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Seed data on first load
     api.post('/seed').catch(() => {});
   }, []);
 
@@ -23,213 +22,331 @@ const LandingPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50" data-testid="landing-page">
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 relative overflow-hidden" data-testid="landing-page">
+      {/* Animated Background Effects */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-0 left-1/4 w-[600px] h-[600px] bg-blue-500/10 rounded-full blur-[120px] animate-pulse"></div>
+        <div className="absolute bottom-0 right-1/4 w-[500px] h-[500px] bg-orange-500/10 rounded-full blur-[100px] animate-pulse" style={{animationDelay: '1s'}}></div>
+        <div className="absolute top-1/2 left-1/2 w-[400px] h-[400px] bg-purple-500/5 rounded-full blur-[80px] animate-pulse" style={{animationDelay: '2s'}}></div>
+        {/* Grid pattern */}
+        <div className="absolute inset-0 grid-bg opacity-30"></div>
+      </div>
+
       {/* Navigation */}
-      <nav className="fixed top-0 left-0 right-0 bg-white/80 backdrop-blur-md border-b border-slate-200 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <Link to="/" className="flex items-center gap-2">
-              <img src={LOGO_URL} alt="CLIPAY" className="h-10 w-auto" />
-            </Link>
-            <div className="flex items-center gap-3">
-              {user ? (
-                <Link
-                  to={user.role === 'admin' ? '/admin' : '/dashboard'}
-                  className="px-4 py-2 bg-slate-900 text-white rounded-xl text-sm font-medium hover:bg-slate-800 transition-colors"
-                  data-testid="go-to-dashboard-btn"
-                >
-                  Dashboard
-                </Link>
-              ) : (
-                <>
+      <nav className="fixed top-0 left-0 right-0 z-50 animate-slideDown">
+        <div className="glass border-b border-white/5">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex items-center justify-between h-20">
+              <Link to="/" className="flex items-center gap-3 group">
+                <div className="relative">
+                  <div className="absolute inset-0 bg-blue-500/20 rounded-xl blur-xl group-hover:bg-blue-500/30 transition-all"></div>
+                  <img src={LOGO_URL} alt="CLIPAY" className="h-12 w-auto relative" />
+                </div>
+              </Link>
+              <div className="flex items-center gap-4">
+                {user ? (
                   <Link
-                    to="/auth"
-                    className="px-4 py-2 text-slate-600 text-sm font-medium hover:text-slate-900 transition-colors"
-                    data-testid="login-btn"
+                    to={user.role === 'admin' ? '/admin' : '/dashboard'}
+                    className="btn-primary flex items-center gap-2"
+                    data-testid="go-to-dashboard-btn"
                   >
-                    Login
+                    Dashboard
+                    <ChevronRight className="w-4 h-4" />
                   </Link>
-                  <Link
-                    to="/auth"
-                    className="px-4 py-2 bg-slate-900 text-white rounded-xl text-sm font-medium hover:bg-slate-800 transition-colors"
-                    data-testid="signup-btn"
-                  >
-                    Get Started
-                  </Link>
-                </>
-              )}
+                ) : (
+                  <>
+                    <Link
+                      to="/auth"
+                      className="px-5 py-2.5 text-slate-300 text-sm font-medium hover:text-white transition-colors"
+                      data-testid="login-btn"
+                    >
+                      Sign In
+                    </Link>
+                    <Link
+                      to="/auth"
+                      className="btn-primary text-sm"
+                      data-testid="signup-btn"
+                    >
+                      Get Started
+                    </Link>
+                  </>
+                )}
+              </div>
             </div>
           </div>
         </div>
       </nav>
 
       {/* Hero Section */}
-      <section className="pt-32 pb-20 px-4">
+      <section className="pt-40 pb-24 px-4 relative">
         <div className="max-w-7xl mx-auto">
-          <div className="text-center max-w-3xl mx-auto">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 border border-blue-100 text-blue-600 text-xs font-medium mb-6">
-              <Star className="w-4 h-4" />
-              New Era of Social Rewards
+          <div className="text-center max-w-4xl mx-auto">
+            {/* Badge */}
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass-light mb-8 animate-slideUp">
+              <Sparkles className="w-4 h-4 text-orange-400" />
+              <span className="text-sm font-medium text-slate-300">
+                Revolutionizing Social Media Earnings
+              </span>
+              <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse"></div>
             </div>
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-slate-900 mb-6 leading-tight tracking-tight">
-              Earn Money Watching{' '}
-              <span className="gradient-text">Social Media</span>{' '}
-              Videos
+            
+            {/* Main Heading */}
+            <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold mb-8 leading-tight tracking-tight animate-slideUp stagger-1">
+              <span className="text-white">Turn Your </span>
+              <span className="gradient-text">Screen Time</span>
+              <br />
+              <span className="text-white">Into </span>
+              <span className="gradient-text-orange">Real Income</span>
             </h1>
-            <p className="text-lg text-slate-500 mb-8 max-w-2xl mx-auto">
-              Turn your screen time into real earnings. Purchase a package, watch daily links from top platforms, and build your network for unlimited commissions.
+            
+            {/* Subtitle */}
+            <p className="text-xl text-slate-400 mb-10 max-w-2xl mx-auto leading-relaxed animate-slideUp stagger-2">
+              Watch videos from top social platforms, build your network, and earn unlimited commissions through our powerful MLM matrix system.
             </p>
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+            
+            {/* CTA Buttons */}
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-slideUp stagger-3">
               <button
                 onClick={handleGetStarted}
-                className="w-full sm:w-auto px-6 py-3 bg-slate-900 text-white rounded-xl font-medium shadow-lg hover:bg-slate-800 transition-all hover:-translate-y-0.5 btn-press flex items-center justify-center gap-2"
+                className="btn-primary w-full sm:w-auto text-lg px-8 py-4 flex items-center justify-center gap-3 group"
                 data-testid="hero-cta-btn"
               >
                 Start Earning Now
-                <ArrowRight className="w-4 h-4" />
+                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
               </button>
               <Link
                 to="/auth"
-                className="w-full sm:w-auto px-6 py-3 bg-white text-slate-700 border border-slate-200 rounded-xl font-medium shadow-sm hover:bg-slate-50 transition-all"
+                className="btn-secondary w-full sm:w-auto text-lg px-8 py-4"
               >
-                Member Login
+                View Packages
               </Link>
+            </div>
+
+            {/* Stats */}
+            <div className="grid grid-cols-3 gap-8 mt-16 max-w-2xl mx-auto animate-slideUp stagger-4">
+              <div className="text-center">
+                <div className="text-3xl font-bold text-white mb-1">$2M+</div>
+                <div className="text-sm text-slate-500">Total Payouts</div>
+              </div>
+              <div className="text-center border-x border-white/10">
+                <div className="text-3xl font-bold text-white mb-1">15K+</div>
+                <div className="text-sm text-slate-500">Active Members</div>
+              </div>
+              <div className="text-center">
+                <div className="text-3xl font-bold text-white mb-1">98%</div>
+                <div className="text-sm text-slate-500">Satisfaction</div>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Features Section */}
-      <section className="py-20 px-4 bg-white">
+      {/* How It Works */}
+      <section className="py-24 px-4 relative">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold text-slate-900 mb-4">How It Works</h2>
-            <p className="text-slate-500 max-w-xl mx-auto">
-              Simple 3-step process to start earning money from social media
+            <span className="inline-block px-4 py-1.5 rounded-full glass-light text-sm font-medium text-blue-400 mb-4">
+              HOW IT WORKS
+            </span>
+            <h2 className="text-4xl font-bold text-white mb-4">
+              Three Simple Steps to <span className="gradient-text">Success</span>
+            </h2>
+            <p className="text-slate-400 max-w-xl mx-auto">
+              Start earning in minutes with our streamlined process
             </p>
           </div>
+          
           <div className="grid md:grid-cols-3 gap-8">
-            <div className="bg-slate-50 p-8 rounded-2xl border border-slate-100 text-center card-hover">
-              <div className="w-14 h-14 bg-blue-50 text-blue-500 rounded-2xl flex items-center justify-center mx-auto mb-5">
-                <Package className="w-7 h-7" />
+            {/* Step 1 */}
+            <div className="glass rounded-3xl p-8 card-hover group animate-slideUp stagger-1">
+              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500/20 to-blue-600/20 border border-blue-500/30 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                <Package className="w-8 h-8 text-blue-400" />
               </div>
-              <h3 className="text-lg font-semibold text-slate-900 mb-2">1. Choose a Package</h3>
-              <p className="text-sm text-slate-500">Select an earning plan that fits your goals to unlock daily viewing quotas.</p>
+              <div className="text-sm font-semibold text-blue-400 mb-2">STEP 01</div>
+              <h3 className="text-xl font-bold text-white mb-3">Choose Your Package</h3>
+              <p className="text-slate-400 text-sm leading-relaxed">
+                Select an earning package that matches your goals. Higher packages unlock more daily tasks and bigger rewards.
+              </p>
             </div>
-            <div className="bg-slate-50 p-8 rounded-2xl border border-slate-100 text-center card-hover">
-              <div className="w-14 h-14 bg-indigo-50 text-indigo-500 rounded-2xl flex items-center justify-center mx-auto mb-5">
-                <Play className="w-7 h-7" />
+
+            {/* Step 2 */}
+            <div className="glass rounded-3xl p-8 card-hover group animate-slideUp stagger-2">
+              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-purple-500/20 to-purple-600/20 border border-purple-500/30 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                <Play className="w-8 h-8 text-purple-400" />
               </div>
-              <h3 className="text-lg font-semibold text-slate-900 mb-2">2. Watch & Earn</h3>
-              <p className="text-sm text-slate-500">Complete your daily quota of watching videos and interacting with social links.</p>
+              <div className="text-sm font-semibold text-purple-400 mb-2">STEP 02</div>
+              <h3 className="text-xl font-bold text-white mb-3">Watch & Earn Daily</h3>
+              <p className="text-slate-400 text-sm leading-relaxed">
+                Complete your daily quota by watching and engaging with social media content. Earnings are credited instantly.
+              </p>
             </div>
-            <div className="bg-slate-50 p-8 rounded-2xl border border-slate-100 text-center card-hover">
-              <div className="w-14 h-14 bg-orange-50 text-orange-500 rounded-2xl flex items-center justify-center mx-auto mb-5">
-                <Users className="w-7 h-7" />
+
+            {/* Step 3 */}
+            <div className="glass rounded-3xl p-8 card-hover group animate-slideUp stagger-3">
+              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-orange-500/20 to-orange-600/20 border border-orange-500/30 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                <Users className="w-8 h-8 text-orange-400" />
               </div>
-              <h3 className="text-lg font-semibold text-slate-900 mb-2">3. Build Network</h3>
-              <p className="text-sm text-slate-500">Invite friends via our Matrix MLM system and earn commissions on their activity.</p>
+              <div className="text-sm font-semibold text-orange-400 mb-2">STEP 03</div>
+              <h3 className="text-xl font-bold text-white mb-3">Build Your Network</h3>
+              <p className="text-slate-400 text-sm leading-relaxed">
+                Invite friends using your unique referral link and earn up to 22% commission on their activities across 3 levels.
+              </p>
             </div>
           </div>
         </div>
       </section>
 
       {/* Packages Preview */}
-      <section className="py-20 px-4">
-        <div className="max-w-5xl mx-auto">
+      <section className="py-24 px-4 relative">
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-blue-950/20 to-transparent"></div>
+        <div className="max-w-6xl mx-auto relative">
           <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold text-slate-900 mb-4">Earning Packages</h2>
-            <p className="text-slate-500 max-w-xl mx-auto">
-              Choose the package that matches your earning goals
+            <span className="inline-block px-4 py-1.5 rounded-full glass-light text-sm font-medium text-orange-400 mb-4">
+              PRICING PLANS
+            </span>
+            <h2 className="text-4xl font-bold text-white mb-4">
+              Investment <span className="gradient-text-orange">Packages</span>
+            </h2>
+            <p className="text-slate-400 max-w-xl mx-auto">
+              Choose the plan that fits your earning potential
             </p>
           </div>
+
           <div className="grid md:grid-cols-3 gap-6">
             {/* Starter */}
-            <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm card-hover">
-              <h3 className="text-lg font-medium text-slate-900 mb-2">Starter</h3>
-              <div className="flex items-baseline gap-1 mb-6">
-                <span className="text-3xl font-bold text-slate-900">$20</span>
+            <div className="glass rounded-3xl p-8 card-hover animate-slideUp stagger-1">
+              <div className="flex items-center gap-2 mb-4">
+                <div className="w-10 h-10 rounded-xl bg-slate-700/50 flex items-center justify-center">
+                  <Star className="w-5 h-5 text-slate-400" />
+                </div>
+                <span className="text-slate-400 font-medium">Starter</span>
               </div>
-              <ul className="space-y-3 mb-8 text-sm text-slate-600">
-                <li className="flex items-center gap-2">
-                  <Check className="w-5 h-5 text-emerald-500" />
-                  4 Ads per day
+              <div className="flex items-baseline gap-1 mb-6">
+                <span className="text-4xl font-bold text-white">$20</span>
+                <span className="text-slate-500">/one-time</span>
+              </div>
+              <ul className="space-y-4 mb-8">
+                <li className="flex items-center gap-3 text-slate-300 text-sm">
+                  <div className="w-5 h-5 rounded-full bg-emerald-500/20 flex items-center justify-center flex-shrink-0">
+                    <Check className="w-3 h-3 text-emerald-400" />
+                  </div>
+                  4 Daily ad views
                 </li>
-                <li className="flex items-center gap-2">
-                  <Check className="w-5 h-5 text-emerald-500" />
-                  $0.25 per ad
+                <li className="flex items-center gap-3 text-slate-300 text-sm">
+                  <div className="w-5 h-5 rounded-full bg-emerald-500/20 flex items-center justify-center flex-shrink-0">
+                    <Check className="w-3 h-3 text-emerald-400" />
+                  </div>
+                  $0.25 per view
                 </li>
-                <li className="flex items-center gap-2">
-                  <Check className="w-5 h-5 text-emerald-500" />
-                  30 Days duration
+                <li className="flex items-center gap-3 text-slate-300 text-sm">
+                  <div className="w-5 h-5 rounded-full bg-emerald-500/20 flex items-center justify-center flex-shrink-0">
+                    <Check className="w-3 h-3 text-emerald-400" />
+                  </div>
+                  30 days duration
+                </li>
+                <li className="flex items-center gap-3 text-slate-300 text-sm">
+                  <div className="w-5 h-5 rounded-full bg-emerald-500/20 flex items-center justify-center flex-shrink-0">
+                    <Check className="w-3 h-3 text-emerald-400" />
+                  </div>
+                  Level 1 Matrix access
                 </li>
               </ul>
-              <button
-                onClick={handleGetStarted}
-                className="w-full py-2.5 rounded-xl border border-slate-200 text-slate-700 text-sm font-medium hover:bg-slate-50 transition-colors"
-              >
+              <button onClick={handleGetStarted} className="w-full py-3 rounded-xl font-semibold transition-all duration-300 bg-slate-700/50 text-white border border-slate-600 hover:bg-slate-700 hover:border-slate-500">
                 Get Started
               </button>
             </div>
 
-            {/* Premium */}
-            <div className="bg-slate-900 p-6 rounded-2xl shadow-xl transform md:-translate-y-2 relative">
-              <div className="absolute -top-3 right-6">
-                <span className="bg-blue-500 text-white text-xs font-semibold px-3 py-1 rounded-full shadow-sm">
-                  Popular
-                </span>
+            {/* Premium - Featured */}
+            <div className="relative animate-slideUp stagger-2">
+              <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-500 to-purple-500 rounded-3xl blur opacity-30"></div>
+              <div className="relative glass rounded-3xl p-8 border border-blue-500/30">
+                <div className="absolute -top-4 left-1/2 -translate-x-1/2">
+                  <span className="px-4 py-1.5 rounded-full text-xs font-bold bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-lg">
+                    MOST POPULAR
+                  </span>
+                </div>
+                <div className="flex items-center gap-2 mb-4 mt-2">
+                  <div className="w-10 h-10 rounded-xl bg-blue-500/20 flex items-center justify-center">
+                    <TrendingUp className="w-5 h-5 text-blue-400" />
+                  </div>
+                  <span className="text-blue-400 font-medium">Premium</span>
+                </div>
+                <div className="flex items-baseline gap-1 mb-6">
+                  <span className="text-4xl font-bold text-white">$100</span>
+                  <span className="text-slate-500">/one-time</span>
+                </div>
+                <ul className="space-y-4 mb-8">
+                  <li className="flex items-center gap-3 text-slate-300 text-sm">
+                    <div className="w-5 h-5 rounded-full bg-blue-500/20 flex items-center justify-center flex-shrink-0">
+                      <Check className="w-3 h-3 text-blue-400" />
+                    </div>
+                    10 Daily ad views
+                  </li>
+                  <li className="flex items-center gap-3 text-slate-300 text-sm">
+                    <div className="w-5 h-5 rounded-full bg-blue-500/20 flex items-center justify-center flex-shrink-0">
+                      <Check className="w-3 h-3 text-blue-400" />
+                    </div>
+                    $0.50 per view
+                  </li>
+                  <li className="flex items-center gap-3 text-slate-300 text-sm">
+                    <div className="w-5 h-5 rounded-full bg-blue-500/20 flex items-center justify-center flex-shrink-0">
+                      <Check className="w-3 h-3 text-blue-400" />
+                    </div>
+                    30 days duration
+                  </li>
+                  <li className="flex items-center gap-3 text-slate-300 text-sm">
+                    <div className="w-5 h-5 rounded-full bg-blue-500/20 flex items-center justify-center flex-shrink-0">
+                      <Check className="w-3 h-3 text-blue-400" />
+                    </div>
+                    Level 3 Matrix access
+                  </li>
+                </ul>
+                <button onClick={handleGetStarted} className="btn-primary w-full">
+                  Get Premium
+                </button>
               </div>
-              <h3 className="text-lg font-medium text-slate-300 mb-2">Premium</h3>
-              <div className="flex items-baseline gap-1 mb-6 text-white">
-                <span className="text-3xl font-bold">$100</span>
-              </div>
-              <ul className="space-y-3 mb-8 text-sm text-slate-300">
-                <li className="flex items-center gap-2">
-                  <Check className="w-5 h-5 text-blue-400" />
-                  10 Ads per day
-                </li>
-                <li className="flex items-center gap-2">
-                  <Check className="w-5 h-5 text-blue-400" />
-                  $0.50 per ad
-                </li>
-                <li className="flex items-center gap-2">
-                  <Check className="w-5 h-5 text-blue-400" />
-                  Level 3 Matrix Unlock
-                </li>
-              </ul>
-              <button
-                onClick={handleGetStarted}
-                className="w-full py-2.5 rounded-xl bg-blue-500 text-white text-sm font-medium hover:bg-blue-600 transition-colors"
-              >
-                Get Started
-              </button>
             </div>
 
             {/* Elite */}
-            <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm card-hover">
-              <h3 className="text-lg font-medium text-slate-900 mb-2">Elite</h3>
-              <div className="flex items-baseline gap-1 mb-6">
-                <span className="text-3xl font-bold text-slate-900">$500</span>
+            <div className="glass rounded-3xl p-8 card-hover animate-slideUp stagger-3">
+              <div className="flex items-center gap-2 mb-4">
+                <div className="w-10 h-10 rounded-xl bg-orange-500/20 flex items-center justify-center">
+                  <Sparkles className="w-5 h-5 text-orange-400" />
+                </div>
+                <span className="text-orange-400 font-medium">Elite</span>
               </div>
-              <ul className="space-y-3 mb-8 text-sm text-slate-600">
-                <li className="flex items-center gap-2">
-                  <Check className="w-5 h-5 text-emerald-500" />
-                  20 Ads per day
+              <div className="flex items-baseline gap-1 mb-6">
+                <span className="text-4xl font-bold text-white">$500</span>
+                <span className="text-slate-500">/one-time</span>
+              </div>
+              <ul className="space-y-4 mb-8">
+                <li className="flex items-center gap-3 text-slate-300 text-sm">
+                  <div className="w-5 h-5 rounded-full bg-orange-500/20 flex items-center justify-center flex-shrink-0">
+                    <Check className="w-3 h-3 text-orange-400" />
+                  </div>
+                  20 Daily ad views
                 </li>
-                <li className="flex items-center gap-2">
-                  <Check className="w-5 h-5 text-emerald-500" />
-                  $1.00 per ad
+                <li className="flex items-center gap-3 text-slate-300 text-sm">
+                  <div className="w-5 h-5 rounded-full bg-orange-500/20 flex items-center justify-center flex-shrink-0">
+                    <Check className="w-3 h-3 text-orange-400" />
+                  </div>
+                  $1.00 per view
                 </li>
-                <li className="flex items-center gap-2">
-                  <Check className="w-5 h-5 text-emerald-500" />
-                  Unlimited Matrix
+                <li className="flex items-center gap-3 text-slate-300 text-sm">
+                  <div className="w-5 h-5 rounded-full bg-orange-500/20 flex items-center justify-center flex-shrink-0">
+                    <Check className="w-3 h-3 text-orange-400" />
+                  </div>
+                  30 days duration
+                </li>
+                <li className="flex items-center gap-3 text-slate-300 text-sm">
+                  <div className="w-5 h-5 rounded-full bg-orange-500/20 flex items-center justify-center flex-shrink-0">
+                    <Check className="w-3 h-3 text-orange-400" />
+                  </div>
+                  Unlimited Matrix access
                 </li>
               </ul>
-              <button
-                onClick={handleGetStarted}
-                className="w-full py-2.5 rounded-xl border border-slate-200 text-slate-700 text-sm font-medium hover:bg-slate-50 transition-colors"
-              >
-                Get Started
+              <button onClick={handleGetStarted} className="btn-accent w-full">
+                Go Elite
               </button>
             </div>
           </div>
@@ -237,59 +354,62 @@ const LandingPage = () => {
       </section>
 
       {/* Trust Section */}
-      <section className="py-20 px-4 bg-white">
+      <section className="py-24 px-4">
         <div className="max-w-7xl mx-auto">
-          <div className="grid md:grid-cols-4 gap-8 text-center">
-            <div>
-              <div className="w-12 h-12 bg-emerald-50 text-emerald-500 rounded-xl flex items-center justify-center mx-auto mb-4">
-                <Shield className="w-6 h-6" />
+          <div className="glass rounded-3xl p-12">
+            <div className="grid md:grid-cols-4 gap-8 text-center">
+              <div className="animate-slideUp stagger-1">
+                <div className="w-14 h-14 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mx-auto mb-4">
+                  <Shield className="w-7 h-7 text-emerald-400" />
+                </div>
+                <h4 className="font-semibold text-white mb-2">100% Secure</h4>
+                <p className="text-sm text-slate-400">Bank-level encryption for all transactions</p>
               </div>
-              <h4 className="font-semibold text-slate-900 mb-1">Secure Platform</h4>
-              <p className="text-sm text-slate-500">Bank-level security for your funds</p>
-            </div>
-            <div>
-              <div className="w-12 h-12 bg-blue-50 text-blue-500 rounded-xl flex items-center justify-center mx-auto mb-4">
-                <Zap className="w-6 h-6" />
+              <div className="animate-slideUp stagger-2">
+                <div className="w-14 h-14 rounded-2xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center mx-auto mb-4">
+                  <Zap className="w-7 h-7 text-blue-400" />
+                </div>
+                <h4 className="font-semibold text-white mb-2">Instant Payouts</h4>
+                <p className="text-sm text-slate-400">24-48 hours withdrawal processing</p>
               </div>
-              <h4 className="font-semibold text-slate-900 mb-1">Instant Payouts</h4>
-              <p className="text-sm text-slate-500">Quick withdrawal processing</p>
-            </div>
-            <div>
-              <div className="w-12 h-12 bg-orange-50 text-orange-500 rounded-xl flex items-center justify-center mx-auto mb-4">
-                <Globe className="w-6 h-6" />
+              <div className="animate-slideUp stagger-3">
+                <div className="w-14 h-14 rounded-2xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-center mx-auto mb-4">
+                  <Globe className="w-7 h-7 text-orange-400" />
+                </div>
+                <h4 className="font-semibold text-white mb-2">Global Platform</h4>
+                <p className="text-sm text-slate-400">Available in 100+ countries worldwide</p>
               </div>
-              <h4 className="font-semibold text-slate-900 mb-1">Global Access</h4>
-              <p className="text-sm text-slate-500">Available worldwide 24/7</p>
-            </div>
-            <div>
-              <div className="w-12 h-12 bg-purple-50 text-purple-500 rounded-xl flex items-center justify-center mx-auto mb-4">
-                <Users className="w-6 h-6" />
+              <div className="animate-slideUp stagger-4">
+                <div className="w-14 h-14 rounded-2xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center mx-auto mb-4">
+                  <Users className="w-7 h-7 text-purple-400" />
+                </div>
+                <h4 className="font-semibold text-white mb-2">15K+ Members</h4>
+                <p className="text-sm text-slate-400">Join our growing community today</p>
               </div>
-              <h4 className="font-semibold text-slate-900 mb-1">1000+ Members</h4>
-              <p className="text-sm text-slate-500">Growing community</p>
             </div>
           </div>
         </div>
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 px-4">
+      <section className="py-24 px-4">
         <div className="max-w-4xl mx-auto">
-          <div className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-3xl p-8 md:p-12 text-center relative overflow-hidden">
-            <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width=%2220%22 height=%2220%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cpath d=%22M0 0h20v20H0z%22 fill=%22none%22/%3E%3Ccircle cx=%221%22 cy=%221%22 r=%221%22 fill=%22rgba(255,255,255,0.05)%22/%3E%3C/svg%3E')] opacity-50"></div>
-            <div className="relative z-10">
-              <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
-                Ready to Start Earning?
+          <div className="relative rounded-3xl overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-r from-blue-600 via-purple-600 to-orange-500 opacity-90"></div>
+            <div className="absolute inset-0 grid-bg opacity-20"></div>
+            <div className="relative p-12 md:p-16 text-center">
+              <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
+                Ready to Start Your <br />Earning Journey?
               </h2>
-              <p className="text-slate-300 mb-8 max-w-xl mx-auto">
-                Join thousands of members who are already earning daily from watching social media content.
+              <p className="text-white/80 mb-10 text-lg max-w-xl mx-auto">
+                Join thousands of members already earning daily with CLIPAY. Start your journey today!
               </p>
               <button
                 onClick={handleGetStarted}
-                className="px-8 py-3 bg-blue-500 text-white rounded-xl font-medium hover:bg-blue-600 transition-colors shadow-lg"
+                className="px-10 py-4 bg-white text-slate-900 rounded-xl font-bold text-lg shadow-2xl hover:shadow-white/20 hover:-translate-y-1 transition-all duration-300"
                 data-testid="cta-join-btn"
               >
-                Join CLIPAY Now
+                Join CLIPAY Today
               </button>
             </div>
           </div>
@@ -297,14 +417,19 @@ const LandingPage = () => {
       </section>
 
       {/* Footer */}
-      <footer className="py-8 px-4 border-t border-slate-200 bg-white">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2">
-            <img src={LOGO_URL} alt="CLIPAY" className="h-8 w-auto" />
+      <footer className="py-12 px-4 border-t border-white/5">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
+          <div className="flex items-center gap-3">
+            <img src={LOGO_URL} alt="CLIPAY" className="h-10 w-auto" />
           </div>
           <p className="text-sm text-slate-500">
-            © {new Date().getFullYear()} CLIPAY. Secure Payments & Rewards.
+            © {new Date().getFullYear()} CLIPAY. Secure Payments & Rewards. All rights reserved.
           </p>
+          <div className="flex items-center gap-6">
+            <a href="#" className="text-sm text-slate-500 hover:text-white transition-colors">Terms</a>
+            <a href="#" className="text-sm text-slate-500 hover:text-white transition-colors">Privacy</a>
+            <a href="#" className="text-sm text-slate-500 hover:text-white transition-colors">Support</a>
+          </div>
         </div>
       </footer>
     </div>
