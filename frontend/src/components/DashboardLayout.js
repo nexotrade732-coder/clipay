@@ -6,7 +6,7 @@ import {
   Users, Award, History, Settings, LogOut, Menu, X, User, ChevronRight, Sparkles
 } from 'lucide-react';
 
-const LOGO_URL = "https://customer-assets.emergentagent.com/job_7a7ddfe3-1bcc-44e3-8f6f-b4e056ab769d/artifacts/y7efvap2_Gemini_Generated_Image_i21q2mi21q2mi21q.png";
+const LOGO_URL = "https://customer-assets.emergentagent.com/job_7a7ddfe3-1bcc-44e3-8f6f-b4e056ab769d/artifacts/y50yreb7_Gemini_Generated_Image_i21q2mi21q2mi21q-removebg-preview.png";
 
 const userNavItems = [
   { path: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },

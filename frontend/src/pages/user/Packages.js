@@ -73,7 +73,7 @@ const UserPackages = () => {
       {/* Header */}
       <div className="text-center max-w-2xl mx-auto animate-slideUp">
         <span className="inline-block px-4 py-1.5 rounded-full glass-light text-sm font-medium text-blue-400 mb-4">
-          INVESTMENT PLANS
+          REWARDS PACKAGES
         </span>
         <h2 className="text-3xl font-bold text-white mb-4">
           Choose Your <span className="gradient-text">Earning Power</span>

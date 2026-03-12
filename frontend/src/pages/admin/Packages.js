@@ -142,7 +142,7 @@ const AdminPackages = () => {
           </div>
           <div>
             <h2 className="text-2xl font-bold text-white">Package Management</h2>
-            <p className="text-slate-400 text-sm">Configure investment packages</p>
+            <p className="text-slate-400 text-sm">Configure rewards packages</p>
           </div>
         </div>
         <motion.button
@@ -252,7 +252,7 @@ const AdminPackages = () => {
             <Package className="w-10 h-10 text-purple-400" />
           </div>
           <h3 className="text-lg font-semibold text-white mb-2">No packages configured</h3>
-          <p className="text-slate-400 mb-6">Create your first investment package to get started</p>
+          <p className="text-slate-400 mb-6">Create your first rewards package to get started</p>
           <button onClick={handleAdd} className="btn-primary">
             <Plus className="w-4 h-4 mr-2 inline" /> Add Package
           </button>

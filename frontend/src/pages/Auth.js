@@ -4,7 +4,7 @@ import { useAuth, useToast } from '@/lib/context';
 import { Eye, EyeOff, Loader2, ArrowLeft, Sparkles, Mail, Lock, User, Link2, Zap, Shield, TrendingUp, Phone, CheckCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const LOGO_URL = "https://customer-assets.emergentagent.com/job_7a7ddfe3-1bcc-44e3-8f6f-b4e056ab769d/artifacts/y7efvap2_Gemini_Generated_Image_i21q2mi21q2mi21q.png";
+const LOGO_URL = "https://customer-assets.emergentagent.com/job_7a7ddfe3-1bcc-44e3-8f6f-b4e056ab769d/artifacts/y50yreb7_Gemini_Generated_Image_i21q2mi21q2mi21q-removebg-preview.png";
 
 const AuthPage = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -117,7 +117,7 @@ const AuthPage = () => {
                 className="flex justify-center mb-6"
               >
                 <div className="relative logo-container">
-                  <img src={LOGO_URL} alt="CLIPAY" className="h-20 w-auto relative" />
+                  <img src={LOGO_URL} alt="CLIPAY" className="h-16 w-auto relative" />
                 </div>
               </motion.div>
 
@@ -203,36 +203,6 @@ const AuthPage = () => {
                           />
                         </div>
                       </motion.div>
-                      
-                      {/* Referral Code */}
-                      <motion.div
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: 0.2 }}
-                      >
-                        <label className="block text-sm font-medium text-slate-300 mb-2">
-                          Referral Code
-                        </label>
-                        <div className="relative group">
-                          <div className="absolute inset-0 bg-gradient-to-r from-orange-500/20 to-amber-500/20 rounded-xl opacity-0 group-focus-within:opacity-100 blur transition-opacity"></div>
-                          <Link2 className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500 group-focus-within:text-orange-400 transition-colors" />
-                          <input
-                            type="text"
-                            name="referralCode"
-                            value={formData.referralCode}
-                            onChange={handleChange}
-                            required={!isLogin}
-                            className={`input-dark pl-12 relative ${referralCode ? 'bg-slate-800/50' : ''}`}
-                            placeholder="CLIPAY-XXXX-XXXX"
-                            readOnly={!!referralCode}
-                            data-testid="referral-input"
-                          />
-                        </div>
-                        <p className="text-xs text-slate-500 mt-2 flex items-center gap-1">
-                          <Sparkles className="w-3 h-3 text-orange-400" />
-                          Required to create an account
-                        </p>
-                      </motion.div>
                     </motion.div>
                   )}
                 </AnimatePresence>
@@ -241,7 +211,7 @@ const AuthPage = () => {
                 <motion.div
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: isLogin ? 0.1 : 0.25 }}
+                  transition={{ delay: isLogin ? 0.1 : 0.2 }}
                 >
                   <label className="block text-sm font-medium text-slate-300 mb-2">
                     Email Address
@@ -266,7 +236,7 @@ const AuthPage = () => {
                 <motion.div
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: isLogin ? 0.2 : 0.3 }}
+                  transition={{ delay: isLogin ? 0.2 : 0.25 }}
                 >
                   <label className="block text-sm font-medium text-slate-300 mb-2">
                     Password
@@ -295,47 +265,80 @@ const AuthPage = () => {
                   </div>
                 </motion.div>
 
-                {/* Confirm Password - Only for Signup */}
+                {/* Confirm Password & Referral Code - Only for Signup */}
                 <AnimatePresence>
                   {!isLogin && (
-                    <motion.div
-                      initial={{ opacity: 0, x: -20, height: 0 }}
-                      animate={{ opacity: 1, x: 0, height: "auto" }}
-                      exit={{ opacity: 0, x: -20, height: 0 }}
-                      transition={{ delay: 0.35 }}
-                    >
-                      <label className="block text-sm font-medium text-slate-300 mb-2">
-                        Confirm Password
-                      </label>
-                      <div className="relative group">
-                        <div className={`absolute inset-0 bg-gradient-to-r ${passwordsMatch ? 'from-emerald-500/20 to-teal-500/20' : 'from-orange-500/20 to-amber-500/20'} rounded-xl opacity-0 group-focus-within:opacity-100 blur transition-opacity`}></div>
-                        <Lock className={`absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 transition-colors ${passwordsMatch ? 'text-emerald-400' : 'text-slate-500 group-focus-within:text-orange-400'}`} />
-                        <input
-                          type={showConfirmPassword ? 'text' : 'password'}
-                          name="confirmPassword"
-                          value={formData.confirmPassword}
-                          onChange={handleChange}
-                          required={!isLogin}
-                          minLength={6}
-                          className={`input-dark pl-12 pr-12 relative ${passwordsMatch ? 'border-emerald-500/50' : ''}`}
-                          placeholder="••••••••"
-                          data-testid="confirm-password-input"
-                        />
-                        {passwordsMatch && (
-                          <CheckCircle className="absolute right-12 top-1/2 -translate-y-1/2 w-5 h-5 text-emerald-400" />
+                    <>
+                      {/* Confirm Password */}
+                      <motion.div
+                        initial={{ opacity: 0, x: -20, height: 0 }}
+                        animate={{ opacity: 1, x: 0, height: "auto" }}
+                        exit={{ opacity: 0, x: -20, height: 0 }}
+                        transition={{ delay: 0.3 }}
+                      >
+                        <label className="block text-sm font-medium text-slate-300 mb-2">
+                          Confirm Password
+                        </label>
+                        <div className="relative group">
+                          <div className={`absolute inset-0 bg-gradient-to-r ${passwordsMatch ? 'from-emerald-500/20 to-teal-500/20' : 'from-orange-500/20 to-amber-500/20'} rounded-xl opacity-0 group-focus-within:opacity-100 blur transition-opacity`}></div>
+                          <Lock className={`absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 transition-colors ${passwordsMatch ? 'text-emerald-400' : 'text-slate-500 group-focus-within:text-orange-400'}`} />
+                          <input
+                            type={showConfirmPassword ? 'text' : 'password'}
+                            name="confirmPassword"
+                            value={formData.confirmPassword}
+                            onChange={handleChange}
+                            required={!isLogin}
+                            minLength={6}
+                            className={`input-dark pl-12 pr-12 relative ${passwordsMatch ? 'border-emerald-500/50' : ''}`}
+                            placeholder="••••••••"
+                            data-testid="confirm-password-input"
+                          />
+                          {passwordsMatch && (
+                            <CheckCircle className="absolute right-12 top-1/2 -translate-y-1/2 w-5 h-5 text-emerald-400" />
+                          )}
+                          <button
+                            type="button"
+                            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                            className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300 transition-colors"
+                          >
+                            {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                          </button>
+                        </div>
+                        {formData.confirmPassword && !passwordsMatch && (
+                          <p className="text-xs text-red-400 mt-1">Passwords do not match</p>
                         )}
-                        <button
-                          type="button"
-                          onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                          className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300 transition-colors"
-                        >
-                          {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                        </button>
-                      </div>
-                      {formData.confirmPassword && !passwordsMatch && (
-                        <p className="text-xs text-red-400 mt-1">Passwords do not match</p>
-                      )}
-                    </motion.div>
+                      </motion.div>
+
+                      {/* Referral Code - Now at the end */}
+                      <motion.div
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: 0.35 }}
+                      >
+                        <label className="block text-sm font-medium text-slate-300 mb-2">
+                          Referral Code
+                        </label>
+                        <div className="relative group">
+                          <div className="absolute inset-0 bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-xl opacity-0 group-focus-within:opacity-100 blur transition-opacity"></div>
+                          <Link2 className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500 group-focus-within:text-purple-400 transition-colors" />
+                          <input
+                            type="text"
+                            name="referralCode"
+                            value={formData.referralCode}
+                            onChange={handleChange}
+                            required={!isLogin}
+                            className={`input-dark pl-12 relative ${referralCode ? 'bg-slate-800/50' : ''}`}
+                            placeholder="CLIPAY-XXXX-XXXX"
+                            readOnly={!!referralCode}
+                            data-testid="referral-input"
+                          />
+                        </div>
+                        <p className="text-xs text-slate-500 mt-2 flex items-center gap-1">
+                          <Sparkles className="w-3 h-3 text-purple-400" />
+                          Required to create an account
+                        </p>
+                      </motion.div>
+                    </>
                   )}
                 </AnimatePresence>
 
@@ -406,7 +409,7 @@ const AuthPage = () => {
               Start Your <span className="gradient-text">Earning</span> Journey
             </h2>
             <p className="text-lg text-slate-300 mb-10">
-              Join thousands of members earning daily through our innovative social media monetization platform.
+              Join thousands of members earning daily through our innovative social media rewards platform.
             </p>
           </motion.div>
 
@@ -421,7 +424,7 @@ const AuthPage = () => {
                 <Zap className="w-7 h-7 text-cyan-400" />
               </div>
               <div>
-                <h3 className="font-semibold text-white mb-1">Instant Earnings</h3>
+                <h3 className="font-semibold text-white mb-1">Instant Rewards</h3>
                 <p className="text-sm text-slate-400">Get paid instantly for watching videos</p>
               </div>
             </motion.div>
