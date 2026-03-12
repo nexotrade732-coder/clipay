@@ -14,7 +14,7 @@ Build a production-ready web application called "CLIPAY," a social media monetiz
 ### Core Features Implemented
 
 #### User Features
-- Referral-only signup system
+- Referral-only signup system (with mobile number & confirm password)
 - JWT-based authentication (signin/signout)
 - Manual deposit requests (USDT TRC20/BEP20, JazzCash)
 - Package purchasing system
@@ -45,25 +45,29 @@ Build a production-ready web application called "CLIPAY," a social media monetiz
 
 ## Changelog
 
-### December 12, 2025 - Complete UI/UX Redesign
+### December 12, 2025 - Theme Update & Signup Enhancements
 
 **Completed:**
-- ✅ Complete professional dark theme implementation across all pages
+- ✅ New CLIPAY logo with transparent background (teal/cyan clip icon, orange dollar sign)
+- ✅ New color scheme: Teal (#0891b2) + Orange (#f97316) replacing dark blue
+- ✅ Updated background gradients to match new brand colors
+- ✅ Mobile Number field added to signup form
+- ✅ Confirm Password field added with validation
+- ✅ Password match indicator (green checkmark when matching)
+- ✅ Backend updated to accept mobile number in signup
+
+**Testing Status:**
+- Backend: 100% pass rate (iteration_3)
+- Frontend: 100% pass rate (iteration_3)
+
+### December 12, 2025 - Initial UI/UX Redesign
+
+**Completed:**
+- ✅ Complete professional dark theme implementation
 - ✅ Gradient backgrounds with mesh gradient effects
 - ✅ Glass morphism card designs with hover effects
 - ✅ Framer Motion animations (slide-up, fade-in, scale)
-- ✅ Professional color scheme (blue, purple, orange, emerald accents)
-- ✅ Colorful icon boxes with gradient backgrounds
-- ✅ Enhanced Auth page with split layout and feature cards
-- ✅ All admin pages redesigned (Dashboard, Users, Deposits, Withdrawals, Packages, Links, MLM, Ranks, Settings, Transactions)
-- ✅ User dashboard with prominent stat cards
-- ✅ Custom CSS utilities (input-dark, btn-primary, btn-secondary, badges)
-- ✅ Responsive design maintained
-- ✅ All functionality verified working via testing agent
-
-**Testing Status:**
-- Backend: All APIs tested and working (iteration_1)
-- Frontend: 100% pass rate on UI redesign tests (iteration_2)
+- ✅ All admin and user pages redesigned
 
 ---
 
@@ -76,6 +80,10 @@ Build a production-ready web application called "CLIPAY," a social media monetiz
 - [x] Complete frontend scaffolding
 - [x] Professional dark theme redesign
 - [x] Animations and transitions
+- [x] New brand colors (teal/orange)
+- [x] New CLIPAY logo integration
+- [x] Mobile number in signup
+- [x] Confirm password validation
 
 ### P1 - Pending User Action
 - [ ] SendGrid email configuration (user needs to provide API key)
@@ -104,7 +112,7 @@ Build a production-ready web application called "CLIPAY," a social media monetiz
     ├── package.json      # React dependencies
     ├── tailwind.config.js
     ├── src/
-    │   ├── index.css     # Global styles, dark theme, animations
+    │   ├── index.css     # Global styles, teal/orange theme
     │   ├── App.js        # Main router
     │   ├── lib/context.js # Auth context, API client
     │   ├── components/
@@ -117,10 +125,34 @@ Build a production-ready web application called "CLIPAY," a social media monetiz
 
 ---
 
+## Design System
+
+### Brand Colors (Updated)
+- Primary Teal: #0891b2
+- Light Teal: #22d3ee
+- Primary Orange: #f97316
+- Gold: #fbbf24
+- Emerald: #10b981
+- Background: Dark slate gradient (#0f172a to #1e293b)
+
+### Components
+- Glass cards with backdrop blur
+- Gradient text effects (teal-to-orange)
+- Icon boxes with teal/orange color coding
+- Badge variants (success, warning, error, info)
+- Animated buttons with shine effect
+
+### Logo
+- URL: https://customer-assets.emergentagent.com/job_7a7ddfe3-1bcc-44e3-8f6f-b4e056ab769d/artifacts/y7efvap2_Gemini_Generated_Image_i21q2mi21q2mi21q.png
+- Colors: Teal clip icon, Orange dollar sign, Navy text
+- Tagline: "SECURE PAYMENTS & REWARDS"
+
+---
+
 ## API Endpoints
 
 ### Authentication
-- POST `/api/auth/signup` - User registration (requires referral code)
+- POST `/api/auth/signup` - User registration (name, email, password, referral_code, mobile)
 - POST `/api/auth/login` - User/Admin login
 
 ### User APIs
@@ -145,25 +177,13 @@ Build a production-ready web application called "CLIPAY," a social media monetiz
 
 ---
 
-## Design System
+## Signup Form Fields
 
-### Colors
-- Primary: Blue (#3b82f6)
-- Accent: Orange (#f97316)
-- Purple: (#8b5cf6)
-- Emerald: (#10b981)
-- Background: Dark slate (#0a0f1a)
-
-### Components
-- Glass cards with backdrop blur
-- Gradient text effects
-- Icon boxes with color coding
-- Badge variants (success, warning, error, info)
-- Animated buttons with hover effects
-
-### Animations
-- Slide-up on page load
-- Fade-in transitions
-- Scale on hover for cards
-- Pulse glow effects
-- Gradient shift animations
+| Field | Type | Required | Validation |
+|-------|------|----------|------------|
+| Full Name | text | Yes | Non-empty |
+| Mobile Number | tel | Yes (frontend) | Min 10 characters |
+| Referral Code | text | Yes | Must exist in system |
+| Email Address | email | Yes | Valid email format |
+| Password | password | Yes | Min 6 characters |
+| Confirm Password | password | Yes | Must match password |
