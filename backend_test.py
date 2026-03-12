@@ -4,7 +4,7 @@ import json
 from datetime import datetime
 
 class CLIPAYAPITester:
-    def __init__(self, base_url="https://social-earnings-hub-3.preview.emergentagent.com"):
+    def __init__(self, base_url="https://clipay-preview.preview.emergentagent.com"):
         self.base_url = base_url
         self.user_token = None
         self.admin_token = None
