@@ -565,14 +565,20 @@ async def get_deposit_settings():
         return {
             "usdt_address_trc20": None,
             "usdt_address_bep20": None,
+            "usdt_qr_trc20": None,
+            "usdt_qr_bep20": None,
             "jazzcash_number": None,
-            "jazzcash_name": None
+            "jazzcash_name": None,
+            "jazzcash_qr": None
         }
     return {
         "usdt_address_trc20": settings.get("usdt_address_trc20"),
         "usdt_address_bep20": settings.get("usdt_address_bep20"),
+        "usdt_qr_trc20": settings.get("usdt_qr_trc20"),
+        "usdt_qr_bep20": settings.get("usdt_qr_bep20"),
         "jazzcash_number": settings.get("jazzcash_number"),
-        "jazzcash_name": settings.get("jazzcash_name")
+        "jazzcash_name": settings.get("jazzcash_name"),
+        "jazzcash_qr": settings.get("jazzcash_qr")
     }
 
 @api_router.post("/deposits")
