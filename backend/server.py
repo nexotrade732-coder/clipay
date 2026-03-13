@@ -187,8 +187,11 @@ class SystemSettingsResponse(BaseModel):
     maintenance_mode: bool
     usdt_address_trc20: Optional[str] = None
     usdt_address_bep20: Optional[str] = None
+    usdt_qr_trc20: Optional[str] = None
+    usdt_qr_bep20: Optional[str] = None
     jazzcash_number: Optional[str] = None
     jazzcash_name: Optional[str] = None
+    jazzcash_qr: Optional[str] = None
 
 class SystemSettingsUpdate(BaseModel):
     platform_name: Optional[str] = None
@@ -197,8 +200,11 @@ class SystemSettingsUpdate(BaseModel):
     maintenance_mode: Optional[bool] = None
     usdt_address_trc20: Optional[str] = None
     usdt_address_bep20: Optional[str] = None
+    usdt_qr_trc20: Optional[str] = None
+    usdt_qr_bep20: Optional[str] = None
     jazzcash_number: Optional[str] = None
     jazzcash_name: Optional[str] = None
+    jazzcash_qr: Optional[str] = None
 
 class DashboardStats(BaseModel):
     total_users: int

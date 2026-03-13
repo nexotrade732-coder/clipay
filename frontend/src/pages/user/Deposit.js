@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { api, useToast } from '@/lib/context';
-import { Loader2, Copy, AlertCircle, ArrowDownLeft, Wallet } from 'lucide-react';
+import { Loader2, Copy, AlertCircle, ArrowDownLeft, QrCode, CheckCircle } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 const UserDeposit = () => {
   const toast = useToast();
@@ -62,18 +63,44 @@ const UserDeposit = () => {
     toast.success('Copied to clipboard!');
   };
 
-  const getPaymentAddress = () => {
+  const getPaymentDetails = () => {
     switch (gateway) {
-      case 'usdt_trc20': return settings?.usdt_address_trc20;
-      case 'usdt_bep20': return settings?.usdt_address_bep20;
-      case 'jazzcash': return settings?.jazzcash_number;
-      default: return null;
+      case 'usdt_trc20': 
+        return {
+          address: settings?.usdt_address_trc20,
+          qr: settings?.usdt_qr_trc20,
+          network: 'TRC20 (TRON Network)',
+          color: 'from-red-500/20 to-red-600/10',
+          borderColor: 'border-red-500/30',
+          textColor: 'text-red-400'
+        };
+      case 'usdt_bep20': 
+        return {
+          address: settings?.usdt_address_bep20,
+          qr: settings?.usdt_qr_bep20,
+          network: 'BEP20 (BSC Network)',
+          color: 'from-amber-500/20 to-amber-600/10',
+          borderColor: 'border-amber-500/30',
+          textColor: 'text-amber-400'
+        };
+      case 'jazzcash': 
+        return {
+          address: settings?.jazzcash_number,
+          qr: settings?.jazzcash_qr,
+          network: 'JazzCash Mobile',
+          accountName: settings?.jazzcash_name,
+          color: 'from-pink-500/20 to-pink-600/10',
+          borderColor: 'border-pink-500/30',
+          textColor: 'text-pink-400'
+        };
+      default: 
+        return null;
     }
   };
 
   const getStatusBadge = (status) => {
     switch (status) {
-      case 'approved': return <span className="badge-success">Approved</span>;
+      case 'approved': return <span className="badge-success flex items-center gap-1"><CheckCircle className="w-3 h-3" />Approved</span>;
       case 'rejected': return <span className="badge-error">Rejected</span>;
       default: return <span className="badge-warning">Pending</span>;
     }
@@ -82,122 +109,265 @@ const UserDeposit = () => {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
+        <Loader2 className="w-8 h-8 animate-spin text-cyan-500" />
       </div>
     );
   }
 
-  const paymentAddress = getPaymentAddress();
+  const paymentDetails = getPaymentDetails();
 
   return (
-    <div className="max-w-3xl mx-auto space-y-6" data-testid="deposit-page">
-      {/* Deposit Form */}
-      <div className="glass rounded-3xl p-6 sm:p-8 animate-slideUp">
-        <div className="flex items-center gap-4 mb-8 pb-6 border-b border-white/10">
-          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500/20 to-emerald-600/20 border border-emerald-500/20 flex items-center justify-center">
-            <ArrowDownLeft className="w-6 h-6 text-emerald-400" />
-          </div>
-          <div>
-            <h2 className="text-xl font-bold text-white">Deposit Funds</h2>
-            <p className="text-sm text-slate-400">Add funds to purchase packages</p>
+    <div className="max-w-4xl mx-auto space-y-6" data-testid="deposit-page">
+      {/* Header */}
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="relative rounded-3xl overflow-hidden"
+      >
+        <div className="absolute inset-0 bg-gradient-to-r from-emerald-600/20 via-teal-600/20 to-cyan-600/20"></div>
+        <div className="absolute inset-0 grid-bg opacity-30"></div>
+        <div className="relative p-6 sm:p-8">
+          <div className="flex items-center gap-4">
+            <div className="w-14 h-14 rounded-2xl icon-box-emerald flex items-center justify-center">
+              <ArrowDownLeft className="w-7 h-7 text-emerald-400" />
+            </div>
+            <div>
+              <h2 className="text-2xl font-bold text-white">Deposit Funds</h2>
+              <p className="text-slate-400 text-sm mt-1">Add funds to purchase packages</p>
+            </div>
           </div>
         </div>
+      </motion.div>
 
-        <form onSubmit={handleSubmit} className="space-y-5">
-          {/* Gateway Selection */}
-          <div>
-            <label className="block text-sm font-medium text-slate-300 mb-2">Payment Method</label>
-            <select
-              value={gateway}
-              onChange={(e) => setGateway(e.target.value)}
-              className="input-dark"
-              data-testid="gateway-select"
-            >
-              <option value="usdt_trc20">USDT (TRC20)</option>
-              <option value="usdt_bep20">USDT (BEP20)</option>
-              <option value="jazzcash">JazzCash</option>
-            </select>
+      <div className="grid lg:grid-cols-2 gap-6">
+        {/* Payment Method Selection */}
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="glass rounded-3xl p-6"
+        >
+          <h3 className="text-lg font-semibold text-white mb-4">Select Payment Method</h3>
+          
+          <div className="space-y-3">
+            {/* USDT TRC20 */}
+            <label className={`flex items-center gap-4 p-4 rounded-2xl cursor-pointer transition-all border ${
+              gateway === 'usdt_trc20' 
+                ? 'bg-red-500/10 border-red-500/30' 
+                : 'bg-slate-800/30 border-white/5 hover:border-white/10'
+            }`}>
+              <input
+                type="radio"
+                name="gateway"
+                value="usdt_trc20"
+                checked={gateway === 'usdt_trc20'}
+                onChange={(e) => setGateway(e.target.value)}
+                className="sr-only"
+              />
+              <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
+                gateway === 'usdt_trc20' ? 'bg-red-500/20' : 'bg-slate-700/50'
+              }`}>
+                <span className="text-sm font-bold text-red-400">TRC</span>
+              </div>
+              <div className="flex-1">
+                <p className="font-medium text-white">USDT (TRC20)</p>
+                <p className="text-xs text-slate-400">TRON Network</p>
+              </div>
+              {gateway === 'usdt_trc20' && (
+                <CheckCircle className="w-5 h-5 text-red-400" />
+              )}
+            </label>
+
+            {/* USDT BEP20 */}
+            <label className={`flex items-center gap-4 p-4 rounded-2xl cursor-pointer transition-all border ${
+              gateway === 'usdt_bep20' 
+                ? 'bg-amber-500/10 border-amber-500/30' 
+                : 'bg-slate-800/30 border-white/5 hover:border-white/10'
+            }`}>
+              <input
+                type="radio"
+                name="gateway"
+                value="usdt_bep20"
+                checked={gateway === 'usdt_bep20'}
+                onChange={(e) => setGateway(e.target.value)}
+                className="sr-only"
+              />
+              <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
+                gateway === 'usdt_bep20' ? 'bg-amber-500/20' : 'bg-slate-700/50'
+              }`}>
+                <span className="text-sm font-bold text-amber-400">BEP</span>
+              </div>
+              <div className="flex-1">
+                <p className="font-medium text-white">USDT (BEP20)</p>
+                <p className="text-xs text-slate-400">Binance Smart Chain</p>
+              </div>
+              {gateway === 'usdt_bep20' && (
+                <CheckCircle className="w-5 h-5 text-amber-400" />
+              )}
+            </label>
+
+            {/* JazzCash */}
+            <label className={`flex items-center gap-4 p-4 rounded-2xl cursor-pointer transition-all border ${
+              gateway === 'jazzcash' 
+                ? 'bg-pink-500/10 border-pink-500/30' 
+                : 'bg-slate-800/30 border-white/5 hover:border-white/10'
+            }`}>
+              <input
+                type="radio"
+                name="gateway"
+                value="jazzcash"
+                checked={gateway === 'jazzcash'}
+                onChange={(e) => setGateway(e.target.value)}
+                className="sr-only"
+              />
+              <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
+                gateway === 'jazzcash' ? 'bg-pink-500/20' : 'bg-slate-700/50'
+              }`}>
+                <span className="text-sm font-bold text-pink-400">JC</span>
+              </div>
+              <div className="flex-1">
+                <p className="font-medium text-white">JazzCash</p>
+                <p className="text-xs text-slate-400">Local Mobile Payment</p>
+              </div>
+              {gateway === 'jazzcash' && (
+                <CheckCircle className="w-5 h-5 text-pink-400" />
+              )}
+            </label>
+          </div>
+        </motion.div>
+
+        {/* Payment Details Card */}
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className={`glass rounded-3xl p-6 border ${paymentDetails?.borderColor || 'border-white/10'}`}
+        >
+          <div className="flex items-center gap-3 mb-4">
+            <QrCode className={`w-5 h-5 ${paymentDetails?.textColor || 'text-slate-400'}`} />
+            <h3 className="text-lg font-semibold text-white">Payment Details</h3>
+          </div>
+          
+          <div className={`inline-block px-3 py-1 rounded-full text-xs font-medium mb-4 ${paymentDetails?.textColor} bg-gradient-to-r ${paymentDetails?.color}`}>
+            {paymentDetails?.network}
           </div>
 
-          {/* Payment Address */}
-          {paymentAddress ? (
-            <div className="glass-light rounded-2xl p-4">
-              <p className="text-sm font-medium text-slate-300 mb-2">
-                {gateway === 'jazzcash' ? 'JazzCash Number' : 'Wallet Address'}
-              </p>
-              <div className="flex items-center gap-2">
-                <code className="flex-1 text-sm text-white bg-slate-800/50 px-4 py-3 rounded-xl border border-white/10 font-mono break-all">
-                  {paymentAddress}
-                </code>
-                <button
-                  type="button"
-                  onClick={() => copyToClipboard(paymentAddress)}
-                  className="p-3 rounded-xl bg-blue-500/20 text-blue-400 border border-blue-500/30 hover:bg-blue-500/30 transition-colors"
-                  data-testid="copy-address-btn"
-                >
-                  <Copy className="w-5 h-5" />
-                </button>
+          {paymentDetails?.address ? (
+            <div className="space-y-4">
+              {/* QR Code */}
+              {paymentDetails?.qr && (
+                <div className="flex justify-center">
+                  <div className="p-3 bg-white rounded-2xl shadow-lg">
+                    <img 
+                      src={paymentDetails.qr} 
+                      alt="Payment QR Code" 
+                      className="w-48 h-48 object-contain"
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* Address/Number */}
+              <div>
+                <p className="text-sm text-slate-400 mb-2">
+                  {gateway === 'jazzcash' ? 'JazzCash Number' : 'Wallet Address'}
+                </p>
+                <div className="flex items-center gap-2">
+                  <code className="flex-1 text-sm text-white bg-slate-800/70 px-4 py-3 rounded-xl border border-white/10 font-mono break-all">
+                    {paymentDetails.address}
+                  </code>
+                  <button
+                    type="button"
+                    onClick={() => copyToClipboard(paymentDetails.address)}
+                    className={`p-3 rounded-xl ${paymentDetails?.textColor} bg-gradient-to-r ${paymentDetails?.color} border ${paymentDetails?.borderColor} hover:opacity-80 transition-opacity`}
+                    data-testid="copy-address-btn"
+                  >
+                    <Copy className="w-5 h-5" />
+                  </button>
+                </div>
               </div>
-              {gateway === 'jazzcash' && settings?.jazzcash_name && (
-                <p className="text-sm text-slate-400 mt-2">Account Name: {settings.jazzcash_name}</p>
+
+              {/* Account Name for JazzCash */}
+              {gateway === 'jazzcash' && paymentDetails.accountName && (
+                <div className="p-3 rounded-xl bg-pink-500/10 border border-pink-500/20">
+                  <p className="text-xs text-slate-400 mb-1">Account Holder</p>
+                  <p className="font-medium text-white">{paymentDetails.accountName}</p>
+                </div>
               )}
             </div>
           ) : (
-            <div className="glass-light rounded-2xl p-4 flex items-start gap-3 border border-amber-500/30">
+            <div className="flex items-start gap-3 p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30">
               <AlertCircle className="w-5 h-5 text-amber-400 flex-shrink-0 mt-0.5" />
               <div>
-                <p className="text-sm text-amber-400 font-medium">Payment address not configured</p>
-                <p className="text-xs text-slate-400">Please contact admin to set up payment details.</p>
+                <p className="text-sm text-amber-400 font-medium">Payment not configured</p>
+                <p className="text-xs text-slate-400">Please contact admin to set up this payment method.</p>
               </div>
             </div>
           )}
+        </motion.div>
+      </div>
 
-          {/* Amount */}
-          <div>
-            <label className="block text-sm font-medium text-slate-300 mb-2">Amount (USD)</label>
-            <input
-              type="number"
-              value={amount}
-              onChange={(e) => setAmount(e.target.value)}
-              min="1"
-              step="0.01"
-              placeholder="100.00"
-              className="input-dark"
-              data-testid="amount-input"
-            />
+      {/* Deposit Form */}
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.3 }}
+        className="glass rounded-3xl p-6"
+      >
+        <h3 className="text-lg font-semibold text-white mb-4">Submit Deposit Request</h3>
+        
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="grid md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-slate-300 mb-2">Amount (USD)</label>
+              <input
+                type="number"
+                value={amount}
+                onChange={(e) => setAmount(e.target.value)}
+                min="1"
+                step="0.01"
+                placeholder="100.00"
+                className="input-dark"
+                data-testid="amount-input"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-300 mb-2">
+                Transaction ID / Reference {gateway === 'jazzcash' && '(TID)'}
+              </label>
+              <input
+                type="text"
+                value={txid}
+                onChange={(e) => setTxid(e.target.value)}
+                placeholder={gateway === 'jazzcash' ? 'Enter TID from JazzCash' : 'Enter transaction hash'}
+                className="input-dark"
+                data-testid="txid-input"
+              />
+            </div>
           </div>
-
-          {/* Transaction ID */}
-          <div>
-            <label className="block text-sm font-medium text-slate-300 mb-2">
-              Transaction ID / Reference {gateway === 'jazzcash' && '(TID)'}
-            </label>
-            <input
-              type="text"
-              value={txid}
-              onChange={(e) => setTxid(e.target.value)}
-              placeholder={gateway === 'jazzcash' ? 'Enter TID from JazzCash' : 'Enter transaction hash'}
-              className="input-dark"
-              data-testid="txid-input"
-            />
-            <p className="text-xs text-slate-500 mt-1.5">Enter after making the payment</p>
-          </div>
+          
+          <p className="text-xs text-slate-500">Make the payment first, then enter the transaction ID/reference above</p>
 
           <button
             type="submit"
-            disabled={submitting || !paymentAddress}
-            className="btn-primary w-full py-4 mt-4 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            disabled={submitting || !paymentDetails?.address}
+            className="btn-primary w-full py-4 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
             data-testid="submit-deposit-btn"
           >
             {submitting && <Loader2 className="w-5 h-5 animate-spin" />}
             Submit Deposit Request
           </button>
         </form>
-      </div>
+      </motion.div>
 
       {/* Deposit History */}
       {deposits.length > 0 && (
-        <div className="glass rounded-3xl overflow-hidden animate-slideUp">
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4 }}
+          className="glass rounded-3xl overflow-hidden"
+        >
           <div className="px-6 py-5 border-b border-white/10">
             <h3 className="text-lg font-semibold text-white">Recent Deposits</h3>
           </div>
@@ -223,7 +393,7 @@ const UserDeposit = () => {
               </tbody>
             </table>
           </div>
-        </div>
+        </motion.div>
       )}
     </div>
   );
