@@ -64,11 +64,13 @@ Build a production-ready web application called "CLIPAY" - a social media moneti
 - Three payment methods: USDT TRC20, USDT BEP20, JazzCash
 
 ### Phase 4: Latest Features (Completed - Dec 14, 2025)
-- **50-second Video Watch Timer**
-  - Mandatory wait before claiming rewards
-  - Visual countdown with progress ring
+- **50-second Video Watch Timer with Embedded Player**
+  - Videos play directly on CLIPAY website (embedded iframe)
+  - Multiple timer displays: header (large), video overlay, footer
+  - Circular progress indicator shows completion percentage
   - Warning if user closes early (video locked for day)
   - Claim button enabled only after 50 seconds
+  - Fallback for non-embeddable videos (opens in new tab with timer on page)
 - **USD to PKR Currency Conversion**
   - Admin configurable exchange rate in Settings
   - Deposit page shows PKR equivalent

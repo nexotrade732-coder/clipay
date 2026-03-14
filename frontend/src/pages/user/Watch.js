@@ -1,7 +1,7 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth, api, useToast } from '@/lib/context';
-import { Play, Check, Loader2, ExternalLink, Youtube, Instagram, Facebook, Globe, Package, Sparkles, Zap, X, Clock, AlertCircle } from 'lucide-react';
+import { Play, Check, Loader2, Youtube, Instagram, Facebook, Globe, Package, Sparkles, Zap, X, Clock, AlertCircle, ExternalLink } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const WATCH_DURATION = 50; // seconds required to watch
@@ -26,17 +26,49 @@ const getPlatformColor = (platform) => {
   }
 };
 
+// Convert regular video URLs to embed URLs
+const getEmbedUrl = (url, platform) => {
+  try {
+    // YouTube
+    if (platform?.toLowerCase() === 'youtube' || url.includes('youtube.com') || url.includes('youtu.be')) {
+      let videoId = '';
+      if (url.includes('youtu.be/')) {
+        videoId = url.split('youtu.be/')[1]?.split('?')[0];
+      } else if (url.includes('youtube.com/watch')) {
+        const urlObj = new URL(url);
+        videoId = urlObj.searchParams.get('v');
+      } else if (url.includes('youtube.com/embed/')) {
+        videoId = url.split('embed/')[1]?.split('?')[0];
+      }
+      if (videoId) {
+        return `https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0`;
+      }
+    }
+    
+    // Facebook
+    if (platform?.toLowerCase() === 'facebook' || url.includes('facebook.com')) {
+      return `https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(url)}&autoplay=true`;
+    }
+    
+    // For other platforms, return null (will use fallback)
+    return null;
+  } catch (e) {
+    return null;
+  }
+};
+
 const UserWatch = () => {
   const { user, refreshUser } = useAuth();
   const toast = useToast();
   const [links, setLinks] = useState([]);
   const [progress, setProgress] = useState({ watched_today: 0, daily_quota: 0, earnings_today: 0 });
   const [watchedIds, setWatchedIds] = useState([]);
-  const [skippedIds, setSkippedIds] = useState([]); // Track videos closed early
+  const [skippedIds, setSkippedIds] = useState([]);
   const [loading, setLoading] = useState(true);
   const [watchingLink, setWatchingLink] = useState(null);
   const [timer, setTimer] = useState(0);
   const [showModal, setShowModal] = useState(false);
+  const [claiming, setClaiming] = useState(false);
 
   useEffect(() => {
     fetchData();
@@ -54,12 +86,8 @@ const UserWatch = () => {
       const today = new Date().toISOString().split('T')[0];
       const storedWatched = localStorage.getItem(`clipay_watched_${today}`);
       const storedSkipped = localStorage.getItem(`clipay_skipped_${today}`);
-      if (storedWatched) {
-        setWatchedIds(JSON.parse(storedWatched));
-      }
-      if (storedSkipped) {
-        setSkippedIds(JSON.parse(storedSkipped));
-      }
+      if (storedWatched) setWatchedIds(JSON.parse(storedWatched));
+      if (storedSkipped) setSkippedIds(JSON.parse(storedSkipped));
     } catch (e) {
       if (e.response?.status !== 400) {
         toast.error('Failed to load watch links');
@@ -93,19 +121,14 @@ const UserWatch = () => {
     setWatchingLink(link);
     setTimer(0);
     setShowModal(true);
-    
-    // Open video in new tab
-    window.open(link.url, '_blank');
   };
 
   const handleCloseModal = async () => {
-    if (timer < WATCH_DURATION) {
-      // User closed before 50 seconds - mark as skipped
+    if (timer < WATCH_DURATION && watchingLink) {
       const today = new Date().toISOString().split('T')[0];
       const newSkippedIds = [...skippedIds, watchingLink.id];
       setSkippedIds(newSkippedIds);
       localStorage.setItem(`clipay_skipped_${today}`, JSON.stringify(newSkippedIds));
-      
       toast.error(`Video closed early! You need to watch for ${WATCH_DURATION} seconds to earn. This video is now locked for today.`);
     }
     setShowModal(false);
@@ -119,6 +142,7 @@ const UserWatch = () => {
       return;
     }
 
+    setClaiming(true);
     try {
       const res = await api.post(`/watch/${watchingLink.id}`);
       toast.success(`Earned $${res.data.earned.toFixed(2)}!`);
@@ -137,6 +161,8 @@ const UserWatch = () => {
       setTimer(0);
     } catch (e) {
       toast.error(e.response?.data?.detail || 'Failed to record watch');
+    } finally {
+      setClaiming(false);
     }
   };
 
@@ -168,6 +194,8 @@ const UserWatch = () => {
   const progressPercent = progress.daily_quota > 0 
     ? (progress.watched_today / progress.daily_quota) * 100 
     : 0;
+
+  const embedUrl = watchingLink ? getEmbedUrl(watchingLink.url, watchingLink.platform) : null;
 
   return (
     <div className="max-w-5xl mx-auto space-y-6" data-testid="watch-page">
@@ -227,7 +255,6 @@ const UserWatch = () => {
               style={{ animationDelay: `${index * 0.05}s` }}
               data-testid={`watch-link-${link.id}`}
             >
-              {/* Thumbnail */}
               <div className={`h-36 flex items-center justify-center relative overflow-hidden ${isWatched || isSkipped ? 'grayscale' : ''}`}>
                 <div className={`absolute inset-0 bg-gradient-to-br ${colors.bg}`}></div>
                 <div className={`relative w-16 h-16 rounded-2xl bg-gradient-to-br ${colors.gradient} flex items-center justify-center shadow-lg`}>
@@ -249,11 +276,8 @@ const UserWatch = () => {
                 )}
               </div>
 
-              {/* Content */}
               <div className="p-4">
-                <div className="flex items-start justify-between gap-2 mb-2">
-                  <h4 className="font-medium text-white line-clamp-1">{link.title}</h4>
-                </div>
+                <h4 className="font-medium text-white line-clamp-1 mb-2">{link.title}</h4>
                 <p className="text-xs text-slate-400 mb-4 flex items-center gap-1">
                   <PlatformIcon className={`w-3.5 h-3.5 ${colors.text}`} />
                   {link.platform}
@@ -290,107 +314,201 @@ const UserWatch = () => {
         </div>
       )}
 
-      {/* Watch Timer Modal */}
+      {/* Embedded Video Player Modal */}
       <AnimatePresence>
         {showModal && watchingLink && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 modal-backdrop flex items-center justify-center z-50 p-4"
+            className="fixed inset-0 bg-black/90 backdrop-blur-sm flex items-center justify-center z-50 p-4"
           >
             <motion.div
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              className="glass rounded-3xl p-8 w-full max-w-md text-center"
+              className="w-full max-w-5xl"
             >
-              {/* Close Button */}
-              <button
-                onClick={handleCloseModal}
-                className="absolute top-4 right-4 p-2 hover:bg-white/10 rounded-xl transition-colors"
-              >
-                <X className="w-5 h-5 text-slate-400" />
-              </button>
+              {/* Header with Timer */}
+              <div className="glass rounded-t-3xl p-4 border-b border-white/10">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${getPlatformColor(watchingLink.platform).gradient} flex items-center justify-center`}>
+                      {React.createElement(getPlatformIcon(watchingLink.platform), { className: "w-6 h-6 text-white" })}
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-bold text-white">{watchingLink.title}</h3>
+                      <p className="text-sm text-slate-400">{watchingLink.platform}</p>
+                    </div>
+                  </div>
+                  
+                  {/* Prominent Timer Display */}
+                  <div className="flex items-center gap-4">
+                    <div className={`flex items-center gap-3 px-5 py-3 rounded-2xl ${
+                      timer >= WATCH_DURATION 
+                        ? 'bg-emerald-500/20 border border-emerald-500/50' 
+                        : 'bg-cyan-500/20 border border-cyan-500/50'
+                    }`}>
+                      <div className="relative">
+                        <svg className="w-12 h-12 transform -rotate-90">
+                          <circle cx="24" cy="24" r="20" className="stroke-slate-700" strokeWidth="4" fill="none" />
+                          <circle 
+                            cx="24" cy="24" r="20"
+                            className={timer >= WATCH_DURATION ? 'stroke-emerald-500' : 'stroke-cyan-500'}
+                            strokeWidth="4" fill="none" strokeLinecap="round"
+                            strokeDasharray={126}
+                            strokeDashoffset={126 - (126 * Math.min(timer / WATCH_DURATION, 1))}
+                            style={{ transition: 'stroke-dashoffset 1s linear' }}
+                          />
+                        </svg>
+                        <Clock className={`absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-5 h-5 ${
+                          timer >= WATCH_DURATION ? 'text-emerald-400' : 'text-cyan-400'
+                        }`} />
+                      </div>
+                      <div>
+                        <div className={`text-3xl font-bold ${timer >= WATCH_DURATION ? 'text-emerald-400' : 'text-white'}`}>
+                          {Math.min(timer, WATCH_DURATION)}s
+                        </div>
+                        <div className="text-xs text-slate-400">of {WATCH_DURATION}s required</div>
+                      </div>
+                    </div>
 
-              {/* Timer Circle */}
-              <div className="relative w-40 h-40 mx-auto mb-6">
-                <svg className="w-full h-full transform -rotate-90">
-                  <circle
-                    cx="80"
-                    cy="80"
-                    r="70"
-                    className="stroke-slate-700"
-                    strokeWidth="8"
-                    fill="none"
-                  />
-                  <circle
-                    cx="80"
-                    cy="80"
-                    r="70"
-                    className={timer >= WATCH_DURATION ? 'stroke-emerald-500' : 'stroke-cyan-500'}
-                    strokeWidth="8"
-                    fill="none"
-                    strokeLinecap="round"
-                    strokeDasharray={440}
-                    strokeDashoffset={440 - (440 * Math.min(timer / WATCH_DURATION, 1))}
-                    style={{ transition: 'stroke-dashoffset 1s linear' }}
-                  />
-                </svg>
-                <div className="absolute inset-0 flex items-center justify-center flex-col">
-                  <Clock className={`w-6 h-6 mb-1 ${timer >= WATCH_DURATION ? 'text-emerald-400' : 'text-cyan-400'}`} />
-                  <span className={`text-4xl font-bold ${timer >= WATCH_DURATION ? 'text-emerald-400' : 'text-white'}`}>
-                    {Math.min(timer, WATCH_DURATION)}
-                  </span>
-                  <span className="text-sm text-slate-400">/ {WATCH_DURATION}s</span>
+                    <button
+                      onClick={handleCloseModal}
+                      className="p-3 hover:bg-white/10 rounded-xl transition-colors"
+                    >
+                      <X className="w-6 h-6 text-slate-400" />
+                    </button>
+                  </div>
                 </div>
               </div>
 
-              <h3 className="text-xl font-bold text-white mb-2">{watchingLink.title}</h3>
-              <p className="text-slate-400 text-sm mb-6">
-                {timer >= WATCH_DURATION 
-                  ? 'Great job! You can now claim your reward' 
-                  : 'Keep watching to earn your reward'}
-              </p>
-
-              {timer < WATCH_DURATION ? (
-                <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 mb-4">
-                  <div className="flex items-start gap-3">
-                    <AlertCircle className="w-5 h-5 text-amber-400 flex-shrink-0 mt-0.5" />
-                    <p className="text-sm text-amber-400 text-left">
-                      Warning: If you close this before {WATCH_DURATION} seconds, you won't earn anything and this video will be locked for today.
+              {/* Video Player Area */}
+              <div className="bg-black relative">
+                {embedUrl ? (
+                  <div className="relative" style={{ paddingTop: '56.25%' }}>
+                    <iframe
+                      src={embedUrl}
+                      className="absolute inset-0 w-full h-full"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                      title={watchingLink.title}
+                    />
+                    {/* Timer Overlay on Video */}
+                    <div className="absolute top-4 right-4 z-10">
+                      <div className={`px-4 py-2 rounded-xl backdrop-blur-md ${
+                        timer >= WATCH_DURATION 
+                          ? 'bg-emerald-500/80' 
+                          : 'bg-black/70 border border-cyan-500/50'
+                      }`}>
+                        <div className="flex items-center gap-2">
+                          <Clock className={`w-4 h-4 ${timer >= WATCH_DURATION ? 'text-white' : 'text-cyan-400'}`} />
+                          <span className={`font-bold ${timer >= WATCH_DURATION ? 'text-white' : 'text-cyan-400'}`}>
+                            {Math.min(timer, WATCH_DURATION)}s / {WATCH_DURATION}s
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  // Fallback for non-embeddable videos
+                  <div className="aspect-video flex flex-col items-center justify-center bg-slate-900 p-8">
+                    <div className={`w-24 h-24 rounded-3xl bg-gradient-to-br ${getPlatformColor(watchingLink.platform).gradient} flex items-center justify-center mb-6`}>
+                      {React.createElement(getPlatformIcon(watchingLink.platform), { className: "w-12 h-12 text-white" })}
+                    </div>
+                    <p className="text-slate-300 text-center mb-4">
+                      This video will open in a new tab. Keep this window open to track your watch time.
                     </p>
+                    <a 
+                      href={watchingLink.url} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="btn-primary flex items-center gap-2"
+                    >
+                      <ExternalLink className="w-4 h-4" />
+                      Open Video in New Tab
+                    </a>
+                    {/* Timer Display for Fallback */}
+                    <div className="mt-8 flex items-center gap-3">
+                      <div className="relative w-20 h-20">
+                        <svg className="w-full h-full transform -rotate-90">
+                          <circle cx="40" cy="40" r="35" className="stroke-slate-700" strokeWidth="6" fill="none" />
+                          <circle 
+                            cx="40" cy="40" r="35"
+                            className={timer >= WATCH_DURATION ? 'stroke-emerald-500' : 'stroke-cyan-500'}
+                            strokeWidth="6" fill="none" strokeLinecap="round"
+                            strokeDasharray={220}
+                            strokeDashoffset={220 - (220 * Math.min(timer / WATCH_DURATION, 1))}
+                            style={{ transition: 'stroke-dashoffset 1s linear' }}
+                          />
+                        </svg>
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <span className={`text-2xl font-bold ${timer >= WATCH_DURATION ? 'text-emerald-400' : 'text-white'}`}>
+                            {Math.min(timer, WATCH_DURATION)}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="text-left">
+                        <div className="text-sm text-slate-400">Watch Timer</div>
+                        <div className={`text-lg font-semibold ${timer >= WATCH_DURATION ? 'text-emerald-400' : 'text-white'}`}>
+                          {timer >= WATCH_DURATION ? 'Complete!' : `${WATCH_DURATION - timer}s remaining`}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Footer with Actions */}
+              <div className="glass rounded-b-3xl p-4 border-t border-white/10">
+                <div className="flex items-center justify-between">
+                  <div>
+                    {timer < WATCH_DURATION ? (
+                      <div className="flex items-center gap-2 text-amber-400">
+                        <AlertCircle className="w-5 h-5" />
+                        <span className="text-sm">Watch for {WATCH_DURATION - timer} more seconds to earn</span>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-2 text-emerald-400">
+                        <Sparkles className="w-5 h-5" />
+                        <span className="text-sm font-medium">You can now claim your ${watchingLink.earning?.toFixed(2)} reward!</span>
+                      </div>
+                    )}
+                  </div>
+                  
+                  <div className="flex items-center gap-3">
+                    <button
+                      onClick={handleCloseModal}
+                      className="px-6 py-3 rounded-xl text-slate-400 hover:text-white hover:bg-white/10 transition-all"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={handleClaimReward}
+                      disabled={timer < WATCH_DURATION || claiming}
+                      className={`px-8 py-3 rounded-xl font-semibold transition-all flex items-center gap-2 ${
+                        timer >= WATCH_DURATION
+                          ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white hover:opacity-90 shadow-lg shadow-emerald-500/30'
+                          : 'bg-slate-700/50 text-slate-500 cursor-not-allowed'
+                      }`}
+                    >
+                      {claiming ? (
+                        <Loader2 className="w-5 h-5 animate-spin" />
+                      ) : timer >= WATCH_DURATION ? (
+                        <>
+                          <Sparkles className="w-5 h-5" />
+                          Claim ${watchingLink.earning?.toFixed(2)}
+                        </>
+                      ) : (
+                        <>
+                          <Clock className="w-5 h-5" />
+                          {WATCH_DURATION - timer}s left
+                        </>
+                      )}
+                    </button>
                   </div>
                 </div>
-              ) : (
-                <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 mb-4">
-                  <p className="text-emerald-400 font-medium">
-                    Ready to claim ${watchingLink.earning?.toFixed(2)}!
-                  </p>
-                </div>
-              )}
-
-              <button
-                onClick={handleClaimReward}
-                disabled={timer < WATCH_DURATION}
-                className={`w-full py-4 rounded-xl font-semibold transition-all flex items-center justify-center gap-2 ${
-                  timer >= WATCH_DURATION
-                    ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white hover:opacity-90'
-                    : 'bg-slate-700/50 text-slate-500 cursor-not-allowed'
-                }`}
-              >
-                {timer >= WATCH_DURATION ? (
-                  <>
-                    <Sparkles className="w-5 h-5" />
-                    Claim ${watchingLink.earning?.toFixed(2)} Reward
-                  </>
-                ) : (
-                  <>
-                    <Loader2 className="w-5 h-5 animate-spin" />
-                    Wait {WATCH_DURATION - timer} more seconds...
-                  </>
-                )}
-              </button>
+              </div>
             </motion.div>
           </motion.div>
         )}
