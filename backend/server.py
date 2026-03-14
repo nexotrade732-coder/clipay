@@ -192,6 +192,7 @@ class SystemSettingsResponse(BaseModel):
     jazzcash_number: Optional[str] = None
     jazzcash_name: Optional[str] = None
     jazzcash_qr: Optional[str] = None
+    usd_to_pkr_rate: Optional[float] = 300.0
 
 class SystemSettingsUpdate(BaseModel):
     platform_name: Optional[str] = None
@@ -205,6 +206,7 @@ class SystemSettingsUpdate(BaseModel):
     jazzcash_number: Optional[str] = None
     jazzcash_name: Optional[str] = None
     jazzcash_qr: Optional[str] = None
+    usd_to_pkr_rate: Optional[float] = None
 
 class DashboardStats(BaseModel):
     total_users: int
@@ -569,7 +571,8 @@ async def get_deposit_settings():
             "usdt_qr_bep20": None,
             "jazzcash_number": None,
             "jazzcash_name": None,
-            "jazzcash_qr": None
+            "jazzcash_qr": None,
+            "usd_to_pkr_rate": 300.0
         }
     return {
         "usdt_address_trc20": settings.get("usdt_address_trc20"),
@@ -578,7 +581,8 @@ async def get_deposit_settings():
         "usdt_qr_bep20": settings.get("usdt_qr_bep20"),
         "jazzcash_number": settings.get("jazzcash_number"),
         "jazzcash_name": settings.get("jazzcash_name"),
-        "jazzcash_qr": settings.get("jazzcash_qr")
+        "jazzcash_qr": settings.get("jazzcash_qr"),
+        "usd_to_pkr_rate": settings.get("usd_to_pkr_rate", 300.0)
     }
 
 @api_router.post("/deposits")

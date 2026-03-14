@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { api, useToast } from '@/lib/context';
-import { Loader2, Copy, AlertCircle, ArrowDownLeft, QrCode, CheckCircle } from 'lucide-react';
+import { Loader2, Copy, AlertCircle, ArrowDownLeft, QrCode, CheckCircle, Calculator, ArrowRight } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 const UserDeposit = () => {
@@ -105,6 +105,9 @@ const UserDeposit = () => {
       default: return <span className="badge-warning">Pending</span>;
     }
   };
+
+  const exchangeRate = settings?.usd_to_pkr_rate || 300;
+  const pkrAmount = amount ? (parseFloat(amount) * exchangeRate).toFixed(0) : 0;
 
   if (loading) {
     return (
@@ -307,7 +310,7 @@ const UserDeposit = () => {
         </motion.div>
       </div>
 
-      {/* Deposit Form */}
+      {/* Deposit Form with Currency Conversion */}
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -345,6 +348,34 @@ const UserDeposit = () => {
               />
             </div>
           </div>
+
+          {/* Currency Conversion Summary */}
+          {amount && parseFloat(amount) > 0 && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              className="p-4 rounded-2xl bg-gradient-to-r from-cyan-500/10 to-teal-500/10 border border-cyan-500/30"
+            >
+              <div className="flex items-center gap-2 mb-3">
+                <Calculator className="w-4 h-4 text-cyan-400" />
+                <span className="text-sm font-medium text-cyan-400">Currency Conversion</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <div className="text-center">
+                  <p className="text-2xl font-bold text-white">${parseFloat(amount).toFixed(2)}</p>
+                  <p className="text-xs text-slate-400">USD</p>
+                </div>
+                <div className="flex items-center gap-2 px-4">
+                  <ArrowRight className="w-5 h-5 text-cyan-400" />
+                  <span className="text-xs text-slate-500">@ {exchangeRate} PKR</span>
+                </div>
+                <div className="text-center">
+                  <p className="text-2xl font-bold text-emerald-400">PKR {parseInt(pkrAmount).toLocaleString()}</p>
+                  <p className="text-xs text-slate-400">Pakistani Rupee</p>
+                </div>
+              </div>
+            </motion.div>
+          )}
           
           <p className="text-xs text-slate-500">Make the payment first, then enter the transaction ID/reference above</p>
 
@@ -376,7 +407,8 @@ const UserDeposit = () => {
               <thead className="bg-slate-800/50 text-xs uppercase text-slate-400 font-medium border-b border-white/5">
                 <tr>
                   <th className="px-6 py-4">Date</th>
-                  <th className="px-6 py-4">Amount</th>
+                  <th className="px-6 py-4">Amount (USD)</th>
+                  <th className="px-6 py-4">Amount (PKR)</th>
                   <th className="px-6 py-4">Gateway</th>
                   <th className="px-6 py-4">Status</th>
                 </tr>
@@ -386,6 +418,7 @@ const UserDeposit = () => {
                   <tr key={deposit.id} className="hover:bg-white/5 transition-colors">
                     <td className="px-6 py-4 text-slate-300">{new Date(deposit.created_at).toLocaleDateString()}</td>
                     <td className="px-6 py-4 font-medium text-white">${deposit.amount.toFixed(2)}</td>
+                    <td className="px-6 py-4 text-emerald-400">PKR {(deposit.amount * exchangeRate).toLocaleString()}</td>
                     <td className="px-6 py-4 text-slate-300">{deposit.gateway}</td>
                     <td className="px-6 py-4">{getStatusBadge(deposit.status)}</td>
                   </tr>

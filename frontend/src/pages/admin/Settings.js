@@ -16,7 +16,8 @@ const AdminSettings = () => {
     usdt_qr_bep20: '',
     jazzcash_number: '',
     jazzcash_name: '',
-    jazzcash_qr: ''
+    jazzcash_qr: '',
+    usd_to_pkr_rate: 300
   });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -90,7 +91,8 @@ const AdminSettings = () => {
       await api.put('/admin/settings', {
         ...settings,
         min_withdrawal: parseFloat(settings.min_withdrawal),
-        withdrawal_fee_percent: parseFloat(settings.withdrawal_fee_percent)
+        withdrawal_fee_percent: parseFloat(settings.withdrawal_fee_percent),
+        usd_to_pkr_rate: parseFloat(settings.usd_to_pkr_rate)
       });
       toast.success('Settings saved successfully');
     } catch (e) {
@@ -264,7 +266,7 @@ const AdminSettings = () => {
             </div>
           </div>
           
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-3 gap-4">
             <div>
               <label className="block text-sm font-medium text-slate-300 mb-2">Minimum Withdrawal ($)</label>
               <input
@@ -285,6 +287,18 @@ const AdminSettings = () => {
                 onChange={(e) => setSettings(prev => ({ ...prev, withdrawal_fee_percent: e.target.value }))}
                 className="input-dark"
                 data-testid="withdrawal-fee-input"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-300 mb-2">USD to PKR Rate</label>
+              <input
+                type="number"
+                step="1"
+                value={settings.usd_to_pkr_rate}
+                onChange={(e) => setSettings(prev => ({ ...prev, usd_to_pkr_rate: e.target.value }))}
+                className="input-dark"
+                placeholder="300"
+                data-testid="usd-pkr-rate-input"
               />
             </div>
           </div>
