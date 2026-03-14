@@ -6,7 +6,7 @@ import {
   Users, Award, History, Settings, LogOut, Menu, X, User, ChevronRight, Sparkles
 } from 'lucide-react';
 
-const LOGO_URL = "https://customer-assets.emergentagent.com/job_7a7ddfe3-1bcc-44e3-8f6f-b4e056ab769d/artifacts/y50yreb7_Gemini_Generated_Image_i21q2mi21q2mi21q-removebg-preview.png";
+const LOGO_URL = "https://customer-assets.emergentagent.com/job_e1272004-e80f-434e-aadb-e8d8dc2b88c2/artifacts/zq3sywj3_Untitled_design__1_-removebg-preview.png";
 
 const userNavItems = [
   { path: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -73,7 +73,7 @@ const DashboardLayout = ({ children, isAdmin = false }) => {
           {/* Logo */}
           <div className="p-6 flex items-center justify-between">
             <Link to={isAdmin ? '/admin' : '/dashboard'} className="flex items-center gap-3">
-              <img src={LOGO_URL} alt="CLIPAY" className="h-11 w-auto" />
+              <img src={LOGO_URL} alt="CLIPAY" className="h-10 w-auto" />
             </Link>
             <button 
               onClick={() => setSidebarOpen(false)}

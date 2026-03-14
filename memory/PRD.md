@@ -75,6 +75,16 @@ Build a production-ready web application called "CLIPAY" - a social media moneti
   - Withdraw page shows gross PKR, fee deduction, net PKR
   - History tables show PKR amounts
 
+### Phase 5: Logo Update (Completed - Dec 14, 2025)
+- **Updated CLIPAY Logo** across all pages:
+  - Landing page navbar and footer
+  - Sign-in/Sign-up page
+  - User dashboard sidebar
+  - Admin dashboard sidebar
+  - Metadata (favicon, apple-touch-icon)
+  - Open Graph and Twitter images
+  - PWA manifest.json with proper icons
+
 ## Key API Endpoints
 - `POST /api/auth/signup` - User registration
 - `POST /api/auth/login` - User/Admin login

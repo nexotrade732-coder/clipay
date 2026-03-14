@@ -4,7 +4,7 @@ import { useAuth, useToast } from '@/lib/context';
 import { Eye, EyeOff, Loader2, ArrowLeft, Sparkles, Mail, Lock, User, Link2, Zap, Shield, TrendingUp, Phone, CheckCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const LOGO_URL = "https://customer-assets.emergentagent.com/job_7a7ddfe3-1bcc-44e3-8f6f-b4e056ab769d/artifacts/y50yreb7_Gemini_Generated_Image_i21q2mi21q2mi21q-removebg-preview.png";
+const LOGO_URL = "https://customer-assets.emergentagent.com/job_e1272004-e80f-434e-aadb-e8d8dc2b88c2/artifacts/zq3sywj3_Untitled_design__1_-removebg-preview.png";
 
 const AuthPage = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -117,7 +117,7 @@ const AuthPage = () => {
                 className="flex justify-center mb-6"
               >
                 <div className="relative logo-container">
-                  <img src={LOGO_URL} alt="CLIPAY" className="h-16 w-auto relative" />
+                  <img src={LOGO_URL} alt="CLIPAY" className="h-14 w-auto relative" />
                 </div>
               </motion.div>
 

@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth, api } from '@/lib/context';
 import { Play, Package, Users, ArrowRight, Star, Check, Shield, Zap, Globe, TrendingUp, Sparkles, ChevronRight, ChevronDown, Youtube, Instagram, Facebook, MessageCircle, Send } from 'lucide-react';
 
-const LOGO_URL = "https://customer-assets.emergentagent.com/job_7a7ddfe3-1bcc-44e3-8f6f-b4e056ab769d/artifacts/y50yreb7_Gemini_Generated_Image_i21q2mi21q2mi21q-removebg-preview.png";
+const LOGO_URL = "https://customer-assets.emergentagent.com/job_e1272004-e80f-434e-aadb-e8d8dc2b88c2/artifacts/zq3sywj3_Untitled_design__1_-removebg-preview.png";
 
 // FAQ Data
 const faqs = [
@@ -94,7 +94,7 @@ const LandingPage = () => {
               <Link to="/" className="flex items-center gap-3 group">
                 <div className="relative">
                   <div className="absolute inset-0 bg-cyan-500/20 rounded-xl blur-xl group-hover:bg-cyan-500/30 transition-all"></div>
-                  <img src={LOGO_URL} alt="CLIPAY" className="h-14 w-auto relative" />
+                  <img src={LOGO_URL} alt="CLIPAY" className="h-12 w-auto relative" />
                 </div>
               </Link>
               <div className="flex items-center gap-4">
@@ -535,7 +535,7 @@ const LandingPage = () => {
       <footer className="py-12 px-4 border-t border-white/5">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="flex items-center gap-3">
-            <img src={LOGO_URL} alt="CLIPAY" className="h-10 w-auto" />
+            <img src={LOGO_URL} alt="CLIPAY" className="h-9 w-auto" />
           </div>
           <p className="text-sm text-slate-500">
             © {new Date().getFullYear()} CLIPAY. Secure Payments & Rewards. All rights reserved.
