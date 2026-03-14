@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth, api, useToast } from '@/lib/context';
-import { Loader2, AlertCircle, Users, ArrowUpRight, Wallet } from 'lucide-react';
+import { Loader2, AlertCircle, Users, ArrowUpRight, Wallet, Calculator, ArrowRight } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 const UserWithdraw = () => {
   const { user, refreshUser } = useAuth();
@@ -12,6 +13,7 @@ const UserWithdraw = () => {
   const [referralCount, setReferralCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [exchangeRate, setExchangeRate] = useState(300);
 
   useEffect(() => {
     fetchData();
@@ -19,12 +21,14 @@ const UserWithdraw = () => {
 
   const fetchData = async () => {
     try {
-      const [withdrawalsRes, statsRes] = await Promise.all([
+      const [withdrawalsRes, statsRes, settingsRes] = await Promise.all([
         api.get('/withdrawals/my'),
-        api.get('/referrals/stats')
+        api.get('/referrals/stats'),
+        api.get('/deposits/settings')
       ]);
       setWithdrawals(withdrawalsRes.data);
       setReferralCount(statsRes.data.direct_referrals);
+      setExchangeRate(settingsRes.data.usd_to_pkr_rate || 300);
       
       if (user?.usdt_wallet) setWalletAddress(user.usdt_wallet);
     } catch (e) {
@@ -33,6 +37,11 @@ const UserWithdraw = () => {
       setLoading(false);
     }
   };
+
+  const pkrAmount = amount ? (parseFloat(amount) * exchangeRate).toFixed(0) : 0;
+  const feeAmount = amount ? (parseFloat(amount) * 0.02).toFixed(2) : 0;
+  const netAmount = amount ? (parseFloat(amount) - parseFloat(feeAmount)).toFixed(2) : 0;
+  const netPkrAmount = amount ? (parseFloat(netAmount) * exchangeRate).toFixed(0) : 0;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -172,6 +181,49 @@ const UserWithdraw = () => {
             <p className="text-xs text-slate-500 mt-1.5">Minimum withdrawal: $10. A 2% fee will be applied.</p>
           </div>
 
+          {/* Currency Conversion Summary */}
+          {amount && parseFloat(amount) > 0 && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              className="p-4 rounded-2xl bg-gradient-to-r from-purple-500/10 to-pink-500/10 border border-purple-500/30"
+            >
+              <div className="flex items-center gap-2 mb-3">
+                <Calculator className="w-4 h-4 text-purple-400" />
+                <span className="text-sm font-medium text-purple-400">Currency Conversion</span>
+              </div>
+              <div className="space-y-3">
+                {/* Gross Amount */}
+                <div className="flex items-center justify-between">
+                  <div className="text-center">
+                    <p className="text-xl font-bold text-white">${parseFloat(amount).toFixed(2)}</p>
+                    <p className="text-xs text-slate-400">Requested (USD)</p>
+                  </div>
+                  <div className="flex items-center gap-2 px-4">
+                    <ArrowRight className="w-5 h-5 text-purple-400" />
+                    <span className="text-xs text-slate-500">@ {exchangeRate} PKR</span>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-xl font-bold text-purple-400">PKR {parseInt(pkrAmount).toLocaleString()}</p>
+                    <p className="text-xs text-slate-400">Gross (PKR)</p>
+                  </div>
+                </div>
+                
+                {/* Fee & Net */}
+                <div className="pt-3 border-t border-white/10">
+                  <div className="flex justify-between text-sm mb-2">
+                    <span className="text-slate-400">Fee (2%)</span>
+                    <span className="text-red-400">-${feeAmount}</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-slate-400">You'll receive</span>
+                    <span className="text-emerald-400 font-semibold">${netAmount} ≈ PKR {parseInt(netPkrAmount).toLocaleString()}</span>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          )}
+
           <button
             type="submit"
             disabled={submitting || !canWithdraw || (user?.balance || 0) < 10}
@@ -195,7 +247,8 @@ const UserWithdraw = () => {
               <thead className="bg-slate-800/50 text-xs uppercase text-slate-400 font-medium border-b border-white/5">
                 <tr>
                   <th className="px-6 py-4">Date</th>
-                  <th className="px-6 py-4">Amount</th>
+                  <th className="px-6 py-4">Amount (USD)</th>
+                  <th className="px-6 py-4">Amount (PKR)</th>
                   <th className="px-6 py-4">Gateway</th>
                   <th className="px-6 py-4">Status</th>
                 </tr>
@@ -205,6 +258,7 @@ const UserWithdraw = () => {
                   <tr key={withdrawal.id} className="hover:bg-white/5 transition-colors">
                     <td className="px-6 py-4 text-slate-300">{new Date(withdrawal.created_at).toLocaleDateString()}</td>
                     <td className="px-6 py-4 font-medium text-white">${withdrawal.amount.toFixed(2)}</td>
+                    <td className="px-6 py-4 text-purple-400">PKR {(withdrawal.amount * exchangeRate).toLocaleString()}</td>
                     <td className="px-6 py-4 text-slate-300">{withdrawal.gateway}</td>
                     <td className="px-6 py-4">{getStatusBadge(withdrawal.status)}</td>
                   </tr>
