@@ -885,6 +885,34 @@ async def admin_delete_user(user_id: str, admin: dict = Depends(get_admin_user))
         raise HTTPException(status_code=404, detail="User not found")
     return {"message": "User deleted"}
 
+@api_router.post("/admin/users/{user_id}/impersonate")
+async def admin_impersonate_user(user_id: str, admin: dict = Depends(get_admin_user)):
+    """Allow admin to login as a user to view their dashboard"""
+    user = await db.users.find_one({"id": user_id, "role": "user"}, {"_id": 0})
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    # Create a token for the user with impersonation flag
+    payload = {
+        "user_id": user["id"],
+        "role": "user",
+        "impersonated_by": admin["id"],
+        "exp": datetime.now(timezone.utc) + timedelta(hours=2)  # Shorter expiry for impersonation
+    }
+    token = jwt.encode(payload, JWT_SECRET, algorithm=JWT_ALGORITHM)
+    
+    return {
+        "token": token,
+        "user": {
+            "id": user["id"],
+            "name": user["name"],
+            "email": user["email"],
+            "balance": user.get("balance", 0),
+            "role": "user",
+            "impersonated": True
+        }
+    }
+
 @api_router.get("/admin/deposits")
 async def admin_get_deposits(admin: dict = Depends(get_admin_user)):
     deposits = await db.deposits.find({}, {"_id": 0}).sort("created_at", -1).to_list(1000)

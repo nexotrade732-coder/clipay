@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { api, useToast } from '@/lib/context';
-import { Loader2, Search, Edit, Trash2, X, Ban, Check, Users, Shield, UserPlus, UserX } from 'lucide-react';
+import { Loader2, Search, Edit, Trash2, X, Ban, Check, Users, Shield, UserPlus, UserX, Eye } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const AdminUsers = () => {
@@ -65,6 +65,31 @@ const AdminUsers = () => {
       fetchUsers();
     } catch (e) {
       toast.error('Failed to delete user');
+    }
+  };
+
+  const handleImpersonate = async (user) => {
+    try {
+      const res = await api.post(`/admin/users/${user.id}/impersonate`);
+      const { token, user: impersonatedUser } = res.data;
+      
+      // Store admin's current session
+      const adminToken = localStorage.getItem('clipay_token');
+      const adminUser = localStorage.getItem('clipay_user');
+      localStorage.setItem('clipay_admin_backup_token', adminToken);
+      localStorage.setItem('clipay_admin_backup_user', adminUser);
+      
+      // Set the impersonated user's session
+      localStorage.setItem('clipay_token', token);
+      localStorage.setItem('clipay_user', JSON.stringify(impersonatedUser));
+      localStorage.setItem('clipay_impersonating', 'true');
+      
+      toast.success(`Viewing dashboard as ${user.name}`);
+      
+      // Open user dashboard in new tab
+      window.open('/dashboard', '_blank');
+    } catch (e) {
+      toast.error('Failed to impersonate user');
     }
   };
 
@@ -248,6 +273,14 @@ const AdminUsers = () => {
                     </td>
                     <td className="px-6 py-4 text-right">
                       <div className="flex items-center justify-end gap-2">
+                        <button
+                          onClick={() => handleImpersonate(user)}
+                          className="p-2 rounded-xl bg-cyan-500/10 text-cyan-400 hover:bg-cyan-500/20 transition-colors"
+                          title="View as User"
+                          data-testid={`impersonate-user-${user.id}`}
+                        >
+                          <Eye className="w-4 h-4" />
+                        </button>
                         <button
                           onClick={() => handleEdit(user)}
                           className="p-2 rounded-xl bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 transition-colors"

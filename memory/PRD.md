@@ -87,6 +87,15 @@ Build a production-ready web application called "CLIPAY" - a social media moneti
   - Open Graph and Twitter images
   - PWA manifest.json with proper icons
 
+### Phase 6: Admin Impersonation Feature (Completed - Dec 18, 2025)
+- **"View as User" Feature** in Admin Panel:
+  - Eye icon in admin user list actions
+  - Clicking opens user's dashboard in new tab
+  - Orange "Admin View Mode" banner visible on top
+  - "Return to Admin Panel" button to switch back
+  - Admin session preserved for seamless return
+  - Backend endpoint: POST /api/admin/users/{user_id}/impersonate
+
 ## Key API Endpoints
 - `POST /api/auth/signup` - User registration
 - `POST /api/auth/login` - User/Admin login

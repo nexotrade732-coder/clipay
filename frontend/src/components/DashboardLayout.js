@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/lib/context';
 import {
   LayoutDashboard, Package, Play, ArrowDownLeft, ArrowUpRight,
-  Users, Award, History, Settings, LogOut, Menu, X, User, ChevronRight, Sparkles
+  Users, Award, History, Settings, LogOut, Menu, X, User, ChevronRight, Sparkles, Eye, ArrowLeft
 } from 'lucide-react';
 
 const LOGO_URL = "https://customer-assets.emergentagent.com/job_e1272004-e80f-434e-aadb-e8d8dc2b88c2/artifacts/zq3sywj3_Untitled_design__1_-removebg-preview.png";
@@ -35,13 +35,49 @@ const adminNavItems = [
 
 const DashboardLayout = ({ children, isAdmin = false }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const { user, logout } = useAuth();
+  const [isImpersonating, setIsImpersonating] = useState(false);
+  const { user, logout, setUser, setToken } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
   
   const navItems = isAdmin ? adminNavItems : userNavItems;
+
+  useEffect(() => {
+    const impersonating = localStorage.getItem('clipay_impersonating') === 'true';
+    setIsImpersonating(impersonating);
+  }, []);
+
+  const handleReturnToAdmin = () => {
+    // Restore admin session
+    const adminToken = localStorage.getItem('clipay_admin_backup_token');
+    const adminUser = localStorage.getItem('clipay_admin_backup_user');
+    
+    if (adminToken && adminUser) {
+      localStorage.setItem('clipay_token', adminToken);
+      localStorage.setItem('clipay_user', adminUser);
+      localStorage.removeItem('clipay_admin_backup_token');
+      localStorage.removeItem('clipay_admin_backup_user');
+      localStorage.removeItem('clipay_impersonating');
+      
+      // Update auth context
+      setToken(adminToken);
+      setUser(JSON.parse(adminUser));
+      
+      // Close window if opened in new tab, otherwise navigate
+      if (window.opener) {
+        window.close();
+      } else {
+        navigate('/admin/users');
+        window.location.reload();
+      }
+    }
+  };
   
   const handleLogout = () => {
+    // Clear impersonation data if present
+    localStorage.removeItem('clipay_admin_backup_token');
+    localStorage.removeItem('clipay_admin_backup_user');
+    localStorage.removeItem('clipay_impersonating');
     logout();
     navigate('/');
   };
@@ -148,6 +184,24 @@ const DashboardLayout = ({ children, isAdmin = false }) => {
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col min-h-screen relative">
+        {/* Impersonation Banner */}
+        {isImpersonating && !isAdmin && (
+          <div className="bg-gradient-to-r from-amber-500 to-orange-500 text-black px-4 py-3 flex items-center justify-between sticky top-0 z-40">
+            <div className="flex items-center gap-3">
+              <Eye className="w-5 h-5" />
+              <span className="font-semibold">Admin View Mode</span>
+              <span className="text-black/70">- Viewing {user?.name}'s dashboard</span>
+            </div>
+            <button
+              onClick={handleReturnToAdmin}
+              className="flex items-center gap-2 px-4 py-2 bg-black/20 hover:bg-black/30 rounded-lg font-semibold transition-colors"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              Return to Admin Panel
+            </button>
+          </div>
+        )}
+
         {/* Top Header */}
         <header className="glass border-b border-white/5 px-4 py-4 flex items-center justify-between sticky top-0 z-30">
           <div className="flex items-center gap-4">

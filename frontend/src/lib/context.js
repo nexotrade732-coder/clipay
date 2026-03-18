@@ -38,13 +38,15 @@ export const useAuth = () => useContext(AuthContext);
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
+  const [token, setToken] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const token = localStorage.getItem('clipay_token');
+    const savedToken = localStorage.getItem('clipay_token');
     const savedUser = localStorage.getItem('clipay_user');
     
-    if (token && savedUser) {
+    if (savedToken && savedUser) {
+      setToken(savedToken);
       setUser(JSON.parse(savedUser));
       // Refresh user data
       api.get('/auth/me').then(res => {
@@ -62,6 +64,7 @@ export const AuthProvider = ({ children }) => {
     const res = await api.post('/auth/login', { email, password });
     localStorage.setItem('clipay_token', res.data.token);
     localStorage.setItem('clipay_user', JSON.stringify(res.data.user));
+    setToken(res.data.token);
     setUser(res.data.user);
     return res.data.user;
   };
@@ -76,6 +79,7 @@ export const AuthProvider = ({ children }) => {
     });
     localStorage.setItem('clipay_token', res.data.token);
     localStorage.setItem('clipay_user', JSON.stringify(res.data.user));
+    setToken(res.data.token);
     setUser(res.data.user);
     return res.data.user;
   };
@@ -83,6 +87,7 @@ export const AuthProvider = ({ children }) => {
   const logout = () => {
     localStorage.removeItem('clipay_token');
     localStorage.removeItem('clipay_user');
+    setToken(null);
     setUser(null);
   };
 
@@ -98,7 +103,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, signup, logout, refreshUser, isAdmin: user?.role === 'admin' }}>
+    <AuthContext.Provider value={{ user, token, loading, login, signup, logout, refreshUser, setUser, setToken, isAdmin: user?.role === 'admin' }}>
       {children}
     </AuthContext.Provider>
   );
