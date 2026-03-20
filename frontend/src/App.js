@@ -28,6 +28,7 @@ import AdminTransactions from "@/pages/admin/Transactions";
 
 // Layout
 import DashboardLayout from "@/components/DashboardLayout";
+import FloatingSocialButtons from "@/components/FloatingSocialButtons";
 
 // Protected Route
 const ProtectedRoute = ({ children, adminOnly = false }) => {
@@ -222,6 +223,9 @@ function App() {
             {/* Catch all */}
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
+          
+          {/* Floating Social Buttons - visible on all pages */}
+          <FloatingSocialButtons />
         </BrowserRouter>
       </ToastProvider>
     </AuthProvider>
