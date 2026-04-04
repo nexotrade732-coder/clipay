@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth, api, useToast } from '@/lib/context';
-import { Play, Check, Loader2, Youtube, Instagram, Facebook, Globe, Package, Sparkles, Zap, X, Clock, AlertCircle, ExternalLink } from 'lucide-react';
+import { Play, Check, Loader2, Youtube, Instagram, Facebook, Globe, Package, Sparkles, Zap, X, Clock, AlertCircle, ExternalLink, DollarSign } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const WATCH_DURATION = 50; // seconds required to watch
@@ -29,7 +29,6 @@ const getPlatformColor = (platform) => {
 // Convert regular video URLs to embed URLs
 const getEmbedUrl = (url, platform) => {
   try {
-    // YouTube
     if (platform?.toLowerCase() === 'youtube' || url.includes('youtube.com') || url.includes('youtu.be')) {
       let videoId = '';
       if (url.includes('youtu.be/')) {
@@ -44,13 +43,9 @@ const getEmbedUrl = (url, platform) => {
         return `https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0`;
       }
     }
-    
-    // Facebook
     if (platform?.toLowerCase() === 'facebook' || url.includes('facebook.com')) {
       return `https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(url)}&autoplay=true`;
     }
-    
-    // For other platforms, return null (will use fallback)
     return null;
   } catch (e) {
     return null;
@@ -60,6 +55,7 @@ const getEmbedUrl = (url, platform) => {
 const UserWatch = () => {
   const { user, refreshUser } = useAuth();
   const toast = useToast();
+  const navigate = useNavigate();
   const [links, setLinks] = useState([]);
   const [progress, setProgress] = useState({ watched_today: 0, daily_quota: 0, earnings_today: 0 });
   const [watchedIds, setWatchedIds] = useState([]);
@@ -69,6 +65,7 @@ const UserWatch = () => {
   const [timer, setTimer] = useState(0);
   const [showModal, setShowModal] = useState(false);
   const [claiming, setClaiming] = useState(false);
+  const [timerComplete, setTimerComplete] = useState(false);
 
   useEffect(() => {
     fetchData();
@@ -102,7 +99,13 @@ const UserWatch = () => {
     let interval;
     if (showModal && watchingLink && timer < WATCH_DURATION) {
       interval = setInterval(() => {
-        setTimer(prev => prev + 1);
+        setTimer(prev => {
+          const newTimer = prev + 1;
+          if (newTimer >= WATCH_DURATION) {
+            setTimerComplete(true);
+          }
+          return newTimer;
+        });
       }, 1000);
     }
     return () => clearInterval(interval);
@@ -120,6 +123,7 @@ const UserWatch = () => {
 
     setWatchingLink(link);
     setTimer(0);
+    setTimerComplete(false);
     setShowModal(true);
   };
 
@@ -134,6 +138,7 @@ const UserWatch = () => {
     setShowModal(false);
     setWatchingLink(null);
     setTimer(0);
+    setTimerComplete(false);
   };
 
   const handleClaimReward = async () => {
@@ -145,7 +150,7 @@ const UserWatch = () => {
     setClaiming(true);
     try {
       const res = await api.post(`/watch/${watchingLink.id}`);
-      toast.success(`Earned $${res.data.earned.toFixed(2)}!`);
+      toast.success(`+$${res.data.earned.toFixed(2)} added to your balance!`);
       
       const today = new Date().toISOString().split('T')[0];
       const newWatchedIds = [...watchedIds, watchingLink.id];
@@ -159,6 +164,7 @@ const UserWatch = () => {
       setShowModal(false);
       setWatchingLink(null);
       setTimer(0);
+      setTimerComplete(false);
     } catch (e) {
       toast.error(e.response?.data?.detail || 'Failed to record watch');
     } finally {
@@ -200,7 +206,7 @@ const UserWatch = () => {
   return (
     <div className="max-w-5xl mx-auto space-y-6" data-testid="watch-page">
       {/* Progress Header */}
-      <div className="glass rounded-3xl p-6 animate-slideUp">
+      <div className="glass rounded-3xl p-4 sm:p-6 animate-slideUp">
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
           <div>
             <div className="flex items-center gap-2 mb-2">
@@ -314,76 +320,91 @@ const UserWatch = () => {
         </div>
       )}
 
-      {/* Embedded Video Player Modal */}
+      {/* Embedded Video Player Modal - Responsive */}
       <AnimatePresence>
         {showModal && watchingLink && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/90 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+            className="fixed inset-0 bg-black/95 backdrop-blur-sm flex items-center justify-center z-50 p-2 sm:p-4"
           >
             <motion.div
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              className="w-full max-w-5xl"
+              className="w-full max-w-5xl max-h-[95vh] overflow-y-auto"
             >
-              {/* Header with Timer */}
-              <div className="glass rounded-t-3xl p-4 border-b border-white/10">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-4">
-                    <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${getPlatformColor(watchingLink.platform).gradient} flex items-center justify-center`}>
-                      {React.createElement(getPlatformIcon(watchingLink.platform), { className: "w-6 h-6 text-white" })}
+              {/* Compact Header for Mobile, Full for Desktop */}
+              <div className="glass rounded-t-2xl sm:rounded-t-3xl p-3 sm:p-4 border-b border-white/10">
+                <div className="flex items-center justify-between gap-2">
+                  {/* Title - Compact on mobile */}
+                  <div className="flex items-center gap-2 sm:gap-4 flex-1 min-w-0">
+                    <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br ${getPlatformColor(watchingLink.platform).gradient} flex items-center justify-center flex-shrink-0`}>
+                      {React.createElement(getPlatformIcon(watchingLink.platform), { className: "w-5 h-5 sm:w-6 sm:h-6 text-white" })}
                     </div>
-                    <div>
-                      <h3 className="text-lg font-bold text-white">{watchingLink.title}</h3>
+                    <div className="min-w-0 hidden sm:block">
+                      <h3 className="text-lg font-bold text-white truncate">{watchingLink.title}</h3>
                       <p className="text-sm text-slate-400">{watchingLink.platform}</p>
                     </div>
                   </div>
                   
-                  {/* Prominent Timer Display */}
-                  <div className="flex items-center gap-4">
-                    <div className={`flex items-center gap-3 px-5 py-3 rounded-2xl ${
-                      timer >= WATCH_DURATION 
-                        ? 'bg-emerald-500/20 border border-emerald-500/50' 
-                        : 'bg-cyan-500/20 border border-cyan-500/50'
-                    }`}>
-                      <div className="relative">
-                        <svg className="w-12 h-12 transform -rotate-90">
-                          <circle cx="24" cy="24" r="20" className="stroke-slate-700" strokeWidth="4" fill="none" />
-                          <circle 
-                            cx="24" cy="24" r="20"
-                            className={timer >= WATCH_DURATION ? 'stroke-emerald-500' : 'stroke-cyan-500'}
-                            strokeWidth="4" fill="none" strokeLinecap="round"
-                            strokeDasharray={126}
-                            strokeDashoffset={126 - (126 * Math.min(timer / WATCH_DURATION, 1))}
-                            style={{ transition: 'stroke-dashoffset 1s linear' }}
-                          />
-                        </svg>
-                        <Clock className={`absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-5 h-5 ${
-                          timer >= WATCH_DURATION ? 'text-emerald-400' : 'text-cyan-400'
-                        }`} />
-                      </div>
-                      <div>
-                        <div className={`text-3xl font-bold ${timer >= WATCH_DURATION ? 'text-emerald-400' : 'text-white'}`}>
-                          {Math.min(timer, WATCH_DURATION)}s
+                  {/* SINGLE Timer/Claim Button - This is the ONLY timer display */}
+                  <div className="flex items-center gap-2 sm:gap-3">
+                    {timerComplete ? (
+                      // CLAIM BUTTON - Animated and prominent
+                      <motion.button
+                        initial={{ scale: 0.8 }}
+                        animate={{ scale: [1, 1.05, 1] }}
+                        transition={{ repeat: Infinity, duration: 1.5 }}
+                        onClick={handleClaimReward}
+                        disabled={claiming}
+                        className="px-4 sm:px-6 py-2 sm:py-3 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-bold flex items-center gap-2 shadow-lg shadow-emerald-500/40 hover:shadow-emerald-500/60 transition-all"
+                      >
+                        {claiming ? (
+                          <Loader2 className="w-5 h-5 animate-spin" />
+                        ) : (
+                          <>
+                            <DollarSign className="w-5 h-5" />
+                            <span className="text-lg">CLAIM ${watchingLink.earning?.toFixed(2)}</span>
+                          </>
+                        )}
+                      </motion.button>
+                    ) : (
+                      // Timer Display
+                      <div className="flex items-center gap-2 sm:gap-3 px-3 sm:px-5 py-2 sm:py-3 rounded-xl sm:rounded-2xl bg-cyan-500/20 border border-cyan-500/50">
+                        <div className="relative w-10 h-10 sm:w-12 sm:h-12">
+                          <svg className="w-full h-full transform -rotate-90">
+                            <circle cx="50%" cy="50%" r="40%" className="stroke-slate-700" strokeWidth="3" fill="none" />
+                            <circle 
+                              cx="50%" cy="50%" r="40%"
+                              className="stroke-cyan-500"
+                              strokeWidth="3" fill="none" strokeLinecap="round"
+                              strokeDasharray={126}
+                              strokeDashoffset={126 - (126 * Math.min(timer / WATCH_DURATION, 1))}
+                              style={{ transition: 'stroke-dashoffset 1s linear' }}
+                            />
+                          </svg>
+                          <Clock className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-cyan-400" />
                         </div>
-                        <div className="text-xs text-slate-400">of {WATCH_DURATION}s required</div>
+                        <div className="text-center sm:text-left">
+                          <div className="text-xl sm:text-2xl font-bold text-white">{timer}s</div>
+                          <div className="text-xs text-slate-400 hidden sm:block">of {WATCH_DURATION}s</div>
+                        </div>
                       </div>
-                    </div>
+                    )}
 
                     <button
                       onClick={handleCloseModal}
-                      className="p-3 hover:bg-white/10 rounded-xl transition-colors"
+                      className="p-2 sm:p-3 hover:bg-white/10 rounded-xl transition-colors"
                     >
-                      <X className="w-6 h-6 text-slate-400" />
+                      <X className="w-5 h-5 sm:w-6 sm:h-6 text-slate-400" />
                     </button>
                   </div>
                 </div>
               </div>
 
-              {/* Video Player Area */}
+              {/* Video Player Area - Clean without overlay timer */}
               <div className="bg-black relative">
                 {embedUrl ? (
                   <div className="relative" style={{ paddingTop: '56.25%' }}>
@@ -394,119 +415,50 @@ const UserWatch = () => {
                       allowFullScreen
                       title={watchingLink.title}
                     />
-                    {/* Timer Overlay on Video */}
-                    <div className="absolute top-4 right-4 z-10">
-                      <div className={`px-4 py-2 rounded-xl backdrop-blur-md ${
-                        timer >= WATCH_DURATION 
-                          ? 'bg-emerald-500/80' 
-                          : 'bg-black/70 border border-cyan-500/50'
-                      }`}>
-                        <div className="flex items-center gap-2">
-                          <Clock className={`w-4 h-4 ${timer >= WATCH_DURATION ? 'text-white' : 'text-cyan-400'}`} />
-                          <span className={`font-bold ${timer >= WATCH_DURATION ? 'text-white' : 'text-cyan-400'}`}>
-                            {Math.min(timer, WATCH_DURATION)}s / {WATCH_DURATION}s
-                          </span>
-                        </div>
-                      </div>
-                    </div>
                   </div>
                 ) : (
                   // Fallback for non-embeddable videos
-                  <div className="aspect-video flex flex-col items-center justify-center bg-slate-900 p-8">
-                    <div className={`w-24 h-24 rounded-3xl bg-gradient-to-br ${getPlatformColor(watchingLink.platform).gradient} flex items-center justify-center mb-6`}>
-                      {React.createElement(getPlatformIcon(watchingLink.platform), { className: "w-12 h-12 text-white" })}
+                  <div className="aspect-video flex flex-col items-center justify-center bg-slate-900 p-4 sm:p-8">
+                    <div className={`w-20 h-20 sm:w-24 sm:h-24 rounded-3xl bg-gradient-to-br ${getPlatformColor(watchingLink.platform).gradient} flex items-center justify-center mb-4 sm:mb-6`}>
+                      {React.createElement(getPlatformIcon(watchingLink.platform), { className: "w-10 h-10 sm:w-12 sm:h-12 text-white" })}
                     </div>
-                    <p className="text-slate-300 text-center mb-4">
-                      This video will open in a new tab. Keep this window open to track your watch time.
+                    <p className="text-slate-300 text-center mb-4 text-sm sm:text-base">
+                      This video will open in a new tab. Keep this window open.
                     </p>
                     <a 
                       href={watchingLink.url} 
                       target="_blank" 
                       rel="noopener noreferrer"
-                      className="btn-primary flex items-center gap-2"
+                      className="btn-primary flex items-center gap-2 text-sm sm:text-base"
                     >
                       <ExternalLink className="w-4 h-4" />
-                      Open Video in New Tab
+                      Open Video
                     </a>
-                    {/* Timer Display for Fallback */}
-                    <div className="mt-8 flex items-center gap-3">
-                      <div className="relative w-20 h-20">
-                        <svg className="w-full h-full transform -rotate-90">
-                          <circle cx="40" cy="40" r="35" className="stroke-slate-700" strokeWidth="6" fill="none" />
-                          <circle 
-                            cx="40" cy="40" r="35"
-                            className={timer >= WATCH_DURATION ? 'stroke-emerald-500' : 'stroke-cyan-500'}
-                            strokeWidth="6" fill="none" strokeLinecap="round"
-                            strokeDasharray={220}
-                            strokeDashoffset={220 - (220 * Math.min(timer / WATCH_DURATION, 1))}
-                            style={{ transition: 'stroke-dashoffset 1s linear' }}
-                          />
-                        </svg>
-                        <div className="absolute inset-0 flex items-center justify-center">
-                          <span className={`text-2xl font-bold ${timer >= WATCH_DURATION ? 'text-emerald-400' : 'text-white'}`}>
-                            {Math.min(timer, WATCH_DURATION)}
-                          </span>
-                        </div>
-                      </div>
-                      <div className="text-left">
-                        <div className="text-sm text-slate-400">Watch Timer</div>
-                        <div className={`text-lg font-semibold ${timer >= WATCH_DURATION ? 'text-emerald-400' : 'text-white'}`}>
-                          {timer >= WATCH_DURATION ? 'Complete!' : `${WATCH_DURATION - timer}s remaining`}
-                        </div>
-                      </div>
-                    </div>
                   </div>
                 )}
               </div>
 
-              {/* Footer with Actions */}
-              <div className="glass rounded-b-3xl p-4 border-t border-white/10">
+              {/* Compact Footer */}
+              <div className="glass rounded-b-2xl sm:rounded-b-3xl p-3 sm:p-4 border-t border-white/10">
                 <div className="flex items-center justify-between">
-                  <div>
-                    {timer < WATCH_DURATION ? (
-                      <div className="flex items-center gap-2 text-amber-400">
-                        <AlertCircle className="w-5 h-5" />
-                        <span className="text-sm">Watch for {WATCH_DURATION - timer} more seconds to earn</span>
-                      </div>
-                    ) : (
-                      <div className="flex items-center gap-2 text-emerald-400">
-                        <Sparkles className="w-5 h-5" />
-                        <span className="text-sm font-medium">You can now claim your ${watchingLink.earning?.toFixed(2)} reward!</span>
-                      </div>
-                    )}
-                  </div>
+                  {timerComplete ? (
+                    <div className="flex items-center gap-2 text-emerald-400">
+                      <Sparkles className="w-5 h-5 animate-pulse" />
+                      <span className="text-sm font-medium">Time complete! Click CLAIM to get your reward</span>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-2 text-amber-400">
+                      <AlertCircle className="w-4 h-4 sm:w-5 sm:h-5" />
+                      <span className="text-xs sm:text-sm">{WATCH_DURATION - timer}s more to earn ${watchingLink.earning?.toFixed(2)}</span>
+                    </div>
+                  )}
                   
-                  <div className="flex items-center gap-3">
-                    <button
-                      onClick={handleCloseModal}
-                      className="px-6 py-3 rounded-xl text-slate-400 hover:text-white hover:bg-white/10 transition-all"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      onClick={handleClaimReward}
-                      disabled={timer < WATCH_DURATION || claiming}
-                      className={`px-8 py-3 rounded-xl font-semibold transition-all flex items-center gap-2 ${
-                        timer >= WATCH_DURATION
-                          ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white hover:opacity-90 shadow-lg shadow-emerald-500/30'
-                          : 'bg-slate-700/50 text-slate-500 cursor-not-allowed'
-                      }`}
-                    >
-                      {claiming ? (
-                        <Loader2 className="w-5 h-5 animate-spin" />
-                      ) : timer >= WATCH_DURATION ? (
-                        <>
-                          <Sparkles className="w-5 h-5" />
-                          Claim ${watchingLink.earning?.toFixed(2)}
-                        </>
-                      ) : (
-                        <>
-                          <Clock className="w-5 h-5" />
-                          {WATCH_DURATION - timer}s left
-                        </>
-                      )}
-                    </button>
-                  </div>
+                  <button
+                    onClick={handleCloseModal}
+                    className="px-4 py-2 rounded-xl text-slate-400 hover:text-white hover:bg-white/10 transition-all text-sm"
+                  >
+                    Cancel
+                  </button>
                 </div>
               </div>
             </motion.div>

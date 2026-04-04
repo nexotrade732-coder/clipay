@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth, api, useToast } from '@/lib/context';
-import { Wallet, DollarSign, Users, ArrowUpRight, ArrowDownLeft, Play, Package, TrendingUp, Copy, Sparkles, Target, Zap, AlertTriangle, Gift, Lock } from 'lucide-react';
+import { Wallet, DollarSign, Users, ArrowUpRight, ArrowDownLeft, Play, Package, TrendingUp, Copy, Sparkles, Target, Zap, AlertTriangle, Gift, Lock, PartyPopper, Star, Trophy } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const UserDashboard = () => {
@@ -10,6 +10,7 @@ const UserDashboard = () => {
   const [progress, setProgress] = useState({ watched_today: 0, daily_quota: 0, earnings_today: 0 });
   const [freePackage, setFreePackage] = useState(null);
   const [showTargetModal, setShowTargetModal] = useState(false);
+  const [showWelcomeModal, setShowWelcomeModal] = useState(false);
   const [loading, setLoading] = useState(true);
 
   const fetchData = async () => {
@@ -44,6 +45,17 @@ const UserDashboard = () => {
     }
   }, [user, freePackage]);
 
+  // Show welcome popup for new free package users
+  useEffect(() => {
+    if (user?.is_free_package) {
+      const welcomeShown = localStorage.getItem(`clipay_welcome_shown_${user.id}`);
+      if (!welcomeShown) {
+        setShowWelcomeModal(true);
+        localStorage.setItem(`clipay_welcome_shown_${user.id}`, 'true');
+      }
+    }
+  }, [user]);
+
   const progressPercent = progress.daily_quota > 0 
     ? (progress.watched_today / progress.daily_quota) * 100 
     : 0;
@@ -67,88 +79,150 @@ const UserDashboard = () => {
         </div>
       </div>
 
-      {/* Free Package Target Banner - Only show for free package users */}
+      {/* FREE PACKAGE - PROMINENT ANIMATED BANNER */}
       {user?.is_free_package && freePackage && (
         <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className={`rounded-3xl p-6 relative overflow-hidden ${
+          initial={{ opacity: 0, y: 20, scale: 0.95 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          transition={{ duration: 0.5, type: "spring" }}
+          className={`rounded-3xl p-6 sm:p-8 relative overflow-hidden border-2 ${
             freeTargetPercent >= 100 
-              ? 'bg-gradient-to-r from-amber-500/20 to-orange-500/20 border border-amber-500/40' 
-              : 'bg-gradient-to-r from-cyan-500/10 to-blue-500/10 border border-cyan-500/30'
+              ? 'bg-gradient-to-br from-amber-500/30 via-orange-500/20 to-yellow-500/30 border-amber-400/60' 
+              : 'bg-gradient-to-br from-emerald-500/20 via-cyan-500/20 to-blue-500/20 border-emerald-400/50'
           }`}
         >
-          <div className="flex flex-col md:flex-row items-center gap-6">
-            <div className={`w-16 h-16 rounded-2xl flex items-center justify-center ${
-              freeTargetPercent >= 100 
-                ? 'bg-gradient-to-br from-amber-500 to-orange-500' 
-                : 'bg-gradient-to-br from-cyan-500 to-blue-500'
-            }`}>
-              {freeTargetPercent >= 100 ? <Gift className="w-8 h-8 text-white" /> : <Target className="w-8 h-8 text-white" />}
-            </div>
+          {/* Animated Background Effects */}
+          <div className="absolute inset-0 overflow-hidden">
+            <motion.div 
+              animate={{ rotate: 360 }}
+              transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+              className={`absolute -top-20 -right-20 w-60 h-60 rounded-full blur-3xl ${
+                freeTargetPercent >= 100 ? 'bg-amber-500/30' : 'bg-emerald-500/30'
+              }`}
+            />
+            <motion.div 
+              animate={{ rotate: -360 }}
+              transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
+              className={`absolute -bottom-20 -left-20 w-60 h-60 rounded-full blur-3xl ${
+                freeTargetPercent >= 100 ? 'bg-orange-500/30' : 'bg-cyan-500/30'
+              }`}
+            />
+          </div>
+
+          <div className="relative z-10 flex flex-col lg:flex-row items-center gap-6">
+            {/* Animated Icon */}
+            <motion.div 
+              animate={{ 
+                scale: [1, 1.1, 1],
+                rotate: [0, 5, -5, 0]
+              }}
+              transition={{ duration: 3, repeat: Infinity }}
+              className={`w-20 h-20 sm:w-24 sm:h-24 rounded-2xl flex items-center justify-center shadow-2xl ${
+                freeTargetPercent >= 100 
+                  ? 'bg-gradient-to-br from-amber-400 to-orange-500 shadow-amber-500/50' 
+                  : 'bg-gradient-to-br from-emerald-400 to-cyan-500 shadow-emerald-500/50'
+              }`}
+            >
+              {freeTargetPercent >= 100 ? (
+                <Trophy className="w-10 h-10 sm:w-12 sm:h-12 text-white" />
+              ) : (
+                <Gift className="w-10 h-10 sm:w-12 sm:h-12 text-white" />
+              )}
+            </motion.div>
             
-            <div className="flex-1 text-center md:text-left">
-              <div className="flex items-center justify-center md:justify-start gap-2 mb-2">
-                <span className="px-3 py-1 rounded-full bg-cyan-500/20 text-cyan-400 text-xs font-semibold">
+            <div className="flex-1 text-center lg:text-left">
+              {/* Badge */}
+              <div className="flex items-center justify-center lg:justify-start gap-2 mb-3">
+                <motion.span 
+                  animate={{ scale: [1, 1.05, 1] }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                  className={`px-4 py-1.5 rounded-full text-sm font-bold ${
+                    freeTargetPercent >= 100 
+                      ? 'bg-amber-400 text-amber-900' 
+                      : 'bg-emerald-400 text-emerald-900'
+                  }`}
+                >
                   {freePackage.name}
-                </span>
+                </motion.span>
                 {freeTargetPercent >= 100 && (
-                  <span className="px-3 py-1 rounded-full bg-amber-500/20 text-amber-400 text-xs font-semibold animate-pulse">
-                    Target Reached!
-                  </span>
+                  <motion.span 
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    className="px-3 py-1 rounded-full bg-white/20 text-amber-300 text-xs font-bold flex items-center gap-1"
+                  >
+                    <Star className="w-3 h-3" /> TARGET REACHED!
+                  </motion.span>
                 )}
               </div>
-              <h3 className="text-lg font-bold text-white mb-1">
+
+              {/* Title */}
+              <h3 className="text-xl sm:text-2xl font-bold text-white mb-2">
                 {freeTargetPercent >= 100 
-                  ? "Congratulations! You've reached your target!" 
-                  : "Earn to Unlock Withdrawals"}
+                  ? "You Did It! Ready to Withdraw!" 
+                  : `Earn $${freePackage.withdrawal_target?.toFixed(0)} - It's FREE!`}
               </h3>
-              <p className="text-sm text-slate-400 mb-4">
+
+              {/* Description */}
+              <p className="text-slate-300 mb-5 max-w-xl">
                 {freeTargetPercent >= 100 
-                  ? "Activate a paid package to withdraw your earnings and unlock unlimited earning potential." 
-                  : freePackage.description}
+                  ? "Activate any paid package to withdraw your earnings and unlock unlimited earning potential!" 
+                  : `Watch ${freePackage.daily_ads} videos daily and earn $${freePackage.earning_per_ad?.toFixed(2)} each. Your progress is saved - keep going!`}
               </p>
               
-              {/* Progress Bar */}
-              <div className="mb-4">
+              {/* PROMINENT Progress Bar */}
+              <div className="mb-5">
                 <div className="flex justify-between text-sm mb-2">
-                  <span className="text-slate-400">Progress to Withdrawal</span>
-                  <span className={freeTargetPercent >= 100 ? 'text-amber-400 font-bold' : 'text-cyan-400 font-bold'}>
+                  <span className="text-white font-medium">Your Earnings</span>
+                  <span className={`font-bold text-lg ${freeTargetPercent >= 100 ? 'text-amber-400' : 'text-emerald-400'}`}>
                     ${user?.balance?.toFixed(2)} / ${freePackage.withdrawal_target?.toFixed(2)}
                   </span>
                 </div>
-                <div className="w-full bg-slate-700/50 rounded-full h-3 overflow-hidden">
+                <div className="w-full bg-black/30 rounded-full h-5 overflow-hidden border border-white/20">
                   <motion.div 
                     initial={{ width: 0 }}
                     animate={{ width: `${freeTargetPercent}%` }}
-                    transition={{ duration: 1, ease: "easeOut" }}
-                    className={`h-full rounded-full ${
+                    transition={{ duration: 1.5, ease: "easeOut" }}
+                    className={`h-full rounded-full relative ${
                       freeTargetPercent >= 100 
-                        ? 'bg-gradient-to-r from-amber-500 to-orange-500' 
-                        : 'bg-gradient-to-r from-cyan-500 to-blue-500'
+                        ? 'bg-gradient-to-r from-amber-400 via-yellow-400 to-orange-400' 
+                        : 'bg-gradient-to-r from-emerald-400 via-cyan-400 to-blue-400'
                     }`}
-                    style={{ boxShadow: freeTargetPercent >= 100 ? '0 0 10px rgba(245, 158, 11, 0.5)' : '0 0 10px rgba(8, 145, 178, 0.5)' }}
-                  />
+                  >
+                    {/* Shimmer effect */}
+                    <motion.div 
+                      animate={{ x: ['-100%', '200%'] }}
+                      transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                      className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent"
+                    />
+                  </motion.div>
                 </div>
+                <p className="text-xs text-slate-400 mt-2 text-center">
+                  {freeTargetPercent >= 100 
+                    ? "Target achieved! Activate a package to withdraw" 
+                    : `$${(freePackage.withdrawal_target - (user?.balance || 0)).toFixed(2)} more to unlock withdrawals`}
+                </p>
               </div>
 
-              {freeTargetPercent >= 100 ? (
-                <Link to="/packages" className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 text-white font-semibold hover:opacity-90 transition-all shadow-lg shadow-amber-500/30">
-                  <Package className="w-5 h-5" />
-                  Activate Paid Package Now
-                </Link>
-              ) : (
-                <div className="flex items-center gap-4 text-sm">
-                  <div className="flex items-center gap-2 text-slate-400">
-                    <Play className="w-4 h-4" />
-                    <span>{freePackage.daily_ads} videos/day</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-emerald-400">
-                    <DollarSign className="w-4 h-4" />
-                    <span>${freePackage.earning_per_ad?.toFixed(2)}/video</span>
-                  </div>
-                </div>
-              )}
+              {/* CTA Buttons */}
+              <div className="flex flex-col sm:flex-row gap-3 justify-center lg:justify-start">
+                {freeTargetPercent >= 100 ? (
+                  <Link 
+                    to="/packages" 
+                    className="px-8 py-3 rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 text-black font-bold hover:opacity-90 transition-all flex items-center justify-center gap-2 shadow-lg shadow-amber-500/40"
+                  >
+                    <Package className="w-5 h-5" />
+                    Activate Package to Withdraw
+                  </Link>
+                ) : (
+                  <Link 
+                    to="/watch" 
+                    className="px-8 py-3 rounded-xl bg-gradient-to-r from-emerald-400 to-cyan-500 text-black font-bold hover:opacity-90 transition-all flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/40"
+                  >
+                    <Play className="w-5 h-5" />
+                    Start Watching & Earning
+                  </Link>
+                )}
+              </div>
             </div>
           </div>
         </motion.div>
@@ -444,6 +518,121 @@ const UserDashboard = () => {
                     <Package className="w-5 h-5" />
                     View Packages
                   </Link>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Welcome Modal for New Free Package Users */}
+      <AnimatePresence>
+        {showWelcomeModal && user?.is_free_package && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/90 backdrop-blur-md flex items-center justify-center z-50 p-4"
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8, y: 30 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.8, y: 30 }}
+              transition={{ type: "spring", duration: 0.6 }}
+              className="w-full max-w-md relative"
+            >
+              {/* Confetti/Celebration Effect */}
+              <div className="absolute -inset-4 overflow-hidden pointer-events-none">
+                {[...Array(12)].map((_, i) => (
+                  <motion.div
+                    key={i}
+                    initial={{ y: -100, x: Math.random() * 400 - 200, rotate: 0, opacity: 1 }}
+                    animate={{ 
+                      y: 500, 
+                      rotate: Math.random() * 720 - 360,
+                      opacity: [1, 1, 0]
+                    }}
+                    transition={{ 
+                      duration: 3 + Math.random() * 2, 
+                      repeat: Infinity, 
+                      delay: i * 0.3 
+                    }}
+                    className={`absolute w-3 h-3 rounded-full ${
+                      ['bg-emerald-400', 'bg-cyan-400', 'bg-yellow-400', 'bg-pink-400', 'bg-blue-400'][i % 5]
+                    }`}
+                  />
+                ))}
+              </div>
+
+              <div className="glass rounded-3xl p-8 text-center relative overflow-hidden border-2 border-emerald-500/50">
+                {/* Gradient Background */}
+                <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/20 via-cyan-500/10 to-blue-500/20"></div>
+                
+                <div className="relative z-10">
+                  {/* Animated Icon */}
+                  <motion.div 
+                    animate={{ 
+                      scale: [1, 1.2, 1],
+                      rotate: [0, 10, -10, 0]
+                    }}
+                    transition={{ duration: 1.5, repeat: Infinity }}
+                    className="w-28 h-28 rounded-full bg-gradient-to-br from-emerald-400 to-cyan-500 flex items-center justify-center mx-auto mb-6 shadow-2xl shadow-emerald-500/50"
+                  >
+                    <PartyPopper className="w-14 h-14 text-white" />
+                  </motion.div>
+
+                  {/* Title */}
+                  <motion.h2 
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.2 }}
+                    className="text-3xl font-bold text-white mb-3"
+                  >
+                    CONGRATS ON JOINING CLIPAY!
+                  </motion.h2>
+
+                  {/* Main Message */}
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.4 }}
+                  >
+                    <p className="text-slate-300 mb-4">
+                      Welcome to CLIPAY! You're now part of our earning community.
+                    </p>
+                    
+                    {/* Highlighted Earn $100 Message */}
+                    <div className="p-5 rounded-2xl bg-gradient-to-r from-emerald-500/30 to-cyan-500/30 border border-emerald-400/50 mb-6">
+                      <p className="text-lg text-white mb-2">
+                        Start watching videos and
+                      </p>
+                      <motion.p 
+                        animate={{ scale: [1, 1.05, 1] }}
+                        transition={{ duration: 2, repeat: Infinity }}
+                        className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-300 via-cyan-300 to-blue-300"
+                      >
+                        EARN $100!
+                      </motion.p>
+                      <p className="text-sm text-emerald-300 mt-2">
+                        It's completely FREE to start
+                      </p>
+                    </div>
+                  </motion.div>
+
+                  {/* CTA Button */}
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.6 }}
+                  >
+                    <button
+                      onClick={() => setShowWelcomeModal(false)}
+                      className="w-full py-4 rounded-xl bg-gradient-to-r from-emerald-400 to-cyan-500 text-black font-bold text-lg hover:opacity-90 transition-all flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/40"
+                    >
+                      <Play className="w-6 h-6" />
+                      Start Earning Now!
+                    </button>
+                  </motion.div>
                 </div>
               </div>
             </motion.div>
