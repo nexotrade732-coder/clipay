@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { useAuth, api, useToast } from '@/lib/context';
-import { Loader2, AlertCircle, Users, ArrowUpRight, Wallet, Calculator, ArrowRight } from 'lucide-react';
+import { Loader2, AlertCircle, Users, ArrowUpRight, Wallet, Calculator, ArrowRight, Lock, Package, Gift } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 const UserWithdraw = () => {
@@ -14,6 +15,7 @@ const UserWithdraw = () => {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [exchangeRate, setExchangeRate] = useState(300);
+  const [freePackage, setFreePackage] = useState(null);
 
   useEffect(() => {
     fetchData();
@@ -31,6 +33,12 @@ const UserWithdraw = () => {
       setExchangeRate(settingsRes.data.usd_to_pkr_rate || 300);
       
       if (user?.usdt_wallet) setWalletAddress(user.usdt_wallet);
+
+      // Fetch free package settings if user is on free package
+      if (user?.is_free_package) {
+        const freeRes = await api.get('/free-package/settings');
+        setFreePackage(freeRes.data);
+      }
     } catch (e) {
       console.error(e);
     } finally {
@@ -42,6 +50,10 @@ const UserWithdraw = () => {
   const feeAmount = amount ? (parseFloat(amount) * 0.02).toFixed(2) : 0;
   const netAmount = amount ? (parseFloat(amount) - parseFloat(feeAmount)).toFixed(2) : 0;
   const netPkrAmount = amount ? (parseFloat(netAmount) * exchangeRate).toFixed(0) : 0;
+
+  // Check if withdrawals are locked for free package users
+  const isWithdrawalLocked = user?.is_free_package;
+  const hasReachedTarget = freePackage && user?.balance >= freePackage.withdrawal_target;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -96,7 +108,110 @@ const UserWithdraw = () => {
     );
   }
 
-  const canWithdraw = referralCount >= 2;
+  const canWithdraw = referralCount >= 2 && !isWithdrawalLocked;
+
+  // Show locked message for free package users
+  if (isWithdrawalLocked) {
+    return (
+      <div className="max-w-2xl mx-auto space-y-6" data-testid="withdraw-page-locked">
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="glass rounded-3xl p-8 text-center"
+        >
+          {/* Lock Icon */}
+          <div className={`w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-6 ${
+            hasReachedTarget 
+              ? 'bg-gradient-to-br from-amber-500 to-orange-500 shadow-lg shadow-amber-500/30' 
+              : 'bg-gradient-to-br from-slate-600 to-slate-700'
+          }`}>
+            {hasReachedTarget ? <Gift className="w-12 h-12 text-white" /> : <Lock className="w-12 h-12 text-slate-400" />}
+          </div>
+
+          {/* Content */}
+          <h2 className="text-2xl font-bold text-white mb-3">
+            {hasReachedTarget ? "You're Ready to Withdraw! 🎉" : "Withdrawals Locked"}
+          </h2>
+          
+          {hasReachedTarget ? (
+            <>
+              <p className="text-amber-400 text-lg font-semibold mb-2">
+                Congratulations! You've reached ${freePackage?.withdrawal_target?.toFixed(2)}!
+              </p>
+              <p className="text-slate-400 mb-6">
+                Your current balance is <span className="text-white font-bold">${user?.balance?.toFixed(2)}</span>. 
+                Activate a paid package to unlock withdrawals and continue earning without limits.
+              </p>
+            </>
+          ) : (
+            <>
+              <p className="text-slate-400 mb-6">
+                You're on the <span className="text-cyan-400 font-semibold">{freePackage?.name || 'Free Trial'}</span> package. 
+                Reach the target of <span className="text-white font-bold">${freePackage?.withdrawal_target?.toFixed(2) || '100.00'}</span> to unlock withdrawals.
+              </p>
+              
+              {/* Progress Bar */}
+              <div className="mb-6 max-w-md mx-auto">
+                <div className="flex justify-between text-sm mb-2">
+                  <span className="text-slate-400">Your Progress</span>
+                  <span className="text-cyan-400 font-bold">
+                    ${user?.balance?.toFixed(2)} / ${freePackage?.withdrawal_target?.toFixed(2) || '100.00'}
+                  </span>
+                </div>
+                <div className="w-full bg-slate-700/50 rounded-full h-4 overflow-hidden">
+                  <motion.div 
+                    initial={{ width: 0 }}
+                    animate={{ width: `${freePackage ? Math.min((user?.balance || 0) / freePackage.withdrawal_target * 100, 100) : 0}%` }}
+                    transition={{ duration: 1, ease: "easeOut" }}
+                    className="h-full rounded-full bg-gradient-to-r from-cyan-500 to-blue-500"
+                    style={{ boxShadow: '0 0 10px rgba(8, 145, 178, 0.5)' }}
+                  />
+                </div>
+                <p className="text-xs text-slate-500 mt-2">
+                  ${((freePackage?.withdrawal_target || 100) - (user?.balance || 0)).toFixed(2)} more to unlock
+                </p>
+              </div>
+            </>
+          )}
+
+          {/* Actions */}
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Link 
+              to="/watch" 
+              className="px-6 py-3 rounded-xl bg-slate-700/50 text-white font-medium hover:bg-slate-700 transition-colors"
+            >
+              Continue Earning
+            </Link>
+            {hasReachedTarget && (
+              <Link 
+                to="/packages" 
+                className="px-8 py-3 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 text-white font-semibold hover:opacity-90 transition-all flex items-center justify-center gap-2 shadow-lg shadow-amber-500/30"
+              >
+                <Package className="w-5 h-5" />
+                Activate Package
+              </Link>
+            )}
+          </div>
+        </motion.div>
+
+        {/* Info Card */}
+        <div className="glass rounded-2xl p-6">
+          <div className="flex items-start gap-4">
+            <div className="w-10 h-10 rounded-xl bg-cyan-500/20 flex items-center justify-center flex-shrink-0">
+              <AlertCircle className="w-5 h-5 text-cyan-400" />
+            </div>
+            <div>
+              <h4 className="font-medium text-white mb-1">Why are withdrawals locked?</h4>
+              <p className="text-sm text-slate-400">
+                The free trial package lets you earn and try our platform. Once you reach the ${freePackage?.withdrawal_target?.toFixed(2) || '100.00'} target, 
+                you can activate any paid package to withdraw your earnings and unlock unlimited earning potential.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-3xl mx-auto space-y-6" data-testid="withdraw-page">

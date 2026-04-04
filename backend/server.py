@@ -208,6 +208,24 @@ class SystemSettingsUpdate(BaseModel):
     jazzcash_qr: Optional[str] = None
     usd_to_pkr_rate: Optional[float] = None
 
+# Free Package Models
+class FreePackageSettings(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    is_enabled: bool = True
+    name: str = "Free Trial"
+    daily_ads: int = 4
+    earning_per_ad: float = 0.50
+    withdrawal_target: float = 100.0
+    description: str = "Watch ads daily and earn up to $100. Activate a paid package to withdraw your earnings."
+
+class FreePackageUpdate(BaseModel):
+    is_enabled: Optional[bool] = None
+    name: Optional[str] = None
+    daily_ads: Optional[int] = None
+    earning_per_ad: Optional[float] = None
+    withdrawal_target: Optional[float] = None
+    description: Optional[str] = None
+
 class DashboardStats(BaseModel):
     total_users: int
     active_packages: int
@@ -440,6 +458,20 @@ async def signup(data: UserCreate, background_tasks: BackgroundTasks):
     if not referrer:
         raise HTTPException(status_code=400, detail="Invalid referral code")
     
+    # Check if free package is enabled
+    free_pkg = await db.free_package_settings.find_one({}, {"_id": 0})
+    if not free_pkg:
+        # Create default free package settings
+        free_pkg = {
+            "is_enabled": True,
+            "name": "Free Trial",
+            "daily_ads": 4,
+            "earning_per_ad": 0.50,
+            "withdrawal_target": 100.0,
+            "description": "Watch ads daily and earn up to $100. Activate a paid package to withdraw your earnings."
+        }
+        await db.free_package_settings.insert_one(free_pkg)
+    
     user_id = str(uuid.uuid4())
     user = {
         "id": user_id,
@@ -452,7 +484,8 @@ async def signup(data: UserCreate, background_tasks: BackgroundTasks):
         "balance": 0.0,
         "total_earnings": 0.0,
         "total_withdrawn": 0.0,
-        "active_package": None,
+        "active_package": "Free Trial" if free_pkg.get("is_enabled", True) else None,
+        "is_free_package": True if free_pkg.get("is_enabled", True) else False,
         "package_expiry": None,
         "rank": "None",
         "achieved_ranks": [],
@@ -532,6 +565,7 @@ async def purchase_package(package_id: str, user: dict = Depends(get_current_use
     
     expiry = datetime.now(timezone.utc) + timedelta(days=package["duration_days"])
     
+    # Update user - remove free package status when purchasing paid package
     await db.users.update_one(
         {"id": user["id"]},
         {
@@ -539,7 +573,8 @@ async def purchase_package(package_id: str, user: dict = Depends(get_current_use
             "$set": {
                 "active_package": package["name"],
                 "package_expiry": expiry.isoformat(),
-                "package_id": package_id
+                "package_id": package_id,
+                "is_free_package": False  # User now has a paid package
             }
         }
     )
@@ -585,6 +620,22 @@ async def get_deposit_settings():
         "usd_to_pkr_rate": settings.get("usd_to_pkr_rate", 300.0)
     }
 
+# Free Package Settings Endpoint for Users
+@api_router.get("/free-package/settings")
+async def get_free_package_settings(user: dict = Depends(get_current_user)):
+    """Get free package settings for users to see their target and progress"""
+    free_pkg = await db.free_package_settings.find_one({}, {"_id": 0})
+    if not free_pkg:
+        free_pkg = {
+            "is_enabled": True,
+            "name": "Free Trial",
+            "daily_ads": 4,
+            "earning_per_ad": 0.50,
+            "withdrawal_target": 100.0,
+            "description": "Watch ads daily and earn up to $100. Activate a paid package to withdraw your earnings."
+        }
+    return free_pkg
+
 @api_router.post("/deposits")
 async def create_deposit(data: DepositCreate, user: dict = Depends(get_current_user)):
     if data.amount <= 0:
@@ -618,6 +669,15 @@ async def get_my_deposits(user: dict = Depends(get_current_user)):
 async def create_withdrawal(data: WithdrawCreate, user: dict = Depends(get_current_user)):
     if data.amount <= 0:
         raise HTTPException(status_code=400, detail="Invalid amount")
+    
+    # Check if user is on free package - block withdrawals
+    if user.get("is_free_package", False):
+        free_pkg = await db.free_package_settings.find_one({}, {"_id": 0})
+        target = free_pkg.get("withdrawal_target", 100) if free_pkg else 100
+        raise HTTPException(
+            status_code=400, 
+            detail=f"You need to activate a paid package to withdraw. Your current balance is ${user.get('balance', 0):.2f}. Target: ${target:.2f}"
+        )
     
     settings = await db.system_settings.find_one({}, {"_id": 0})
     min_withdrawal = settings.get("min_withdrawal", 10) if settings else 10
@@ -669,7 +729,15 @@ async def get_watch_links(user: dict = Depends(get_current_user)):
     if not user.get("active_package"):
         raise HTTPException(status_code=400, detail="No active package")
     
-    if user.get("package_expiry"):
+    # Check if user is on free package and has reached target
+    if user.get("is_free_package", False):
+        free_pkg = await db.free_package_settings.find_one({}, {"_id": 0})
+        target = free_pkg.get("withdrawal_target", 100) if free_pkg else 100
+        if user.get("balance", 0) >= target:
+            raise HTTPException(status_code=400, detail="You've reached the free package target! Please activate a paid package to continue earning and withdraw.")
+    
+    # Check package expiry for paid packages
+    if user.get("package_expiry") and not user.get("is_free_package", False):
         expiry = datetime.fromisoformat(user["package_expiry"].replace('Z', '+00:00'))
         if expiry < datetime.now(timezone.utc):
             raise HTTPException(status_code=400, detail="Package expired")
@@ -682,8 +750,15 @@ async def get_watch_progress(user: dict = Depends(get_current_user)):
     if not user.get("active_package"):
         return WatchProgress(watched_today=0, daily_quota=0, earnings_today=0)
     
-    package = await db.packages.find_one({"name": user["active_package"]}, {"_id": 0})
-    daily_quota = package["daily_ads"] if package else 0
+    # Handle free package
+    if user.get("is_free_package", False):
+        free_pkg = await db.free_package_settings.find_one({}, {"_id": 0})
+        daily_quota = free_pkg.get("daily_ads", 4) if free_pkg else 4
+        earning_per_ad = free_pkg.get("earning_per_ad", 0.50) if free_pkg else 0.50
+    else:
+        package = await db.packages.find_one({"name": user["active_package"]}, {"_id": 0})
+        daily_quota = package["daily_ads"] if package else 0
+        earning_per_ad = package["earning_per_ad"] if package else 0
     
     today = datetime.now(timezone.utc).date().isoformat()
     watch_record = await db.watch_records.find_one(
@@ -692,7 +767,6 @@ async def get_watch_progress(user: dict = Depends(get_current_user)):
     )
     
     watched_today = watch_record["watched"] if watch_record else 0
-    earning_per_ad = package["earning_per_ad"] if package else 0
     earnings_today = watched_today * earning_per_ad
     
     return WatchProgress(watched_today=watched_today, daily_quota=daily_quota, earnings_today=earnings_today)
@@ -702,7 +776,15 @@ async def watch_link(link_id: str, background_tasks: BackgroundTasks, user: dict
     if not user.get("active_package"):
         raise HTTPException(status_code=400, detail="No active package")
     
-    if user.get("package_expiry"):
+    # Check if user is on free package and has reached target
+    if user.get("is_free_package", False):
+        free_pkg = await db.free_package_settings.find_one({}, {"_id": 0})
+        target = free_pkg.get("withdrawal_target", 100) if free_pkg else 100
+        if user.get("balance", 0) >= target:
+            raise HTTPException(status_code=400, detail="You've reached the free package target! Please activate a paid package to continue earning.")
+    
+    # Check package expiry for paid packages
+    if user.get("package_expiry") and not user.get("is_free_package", False):
         expiry = datetime.fromisoformat(user["package_expiry"].replace('Z', '+00:00'))
         if expiry < datetime.now(timezone.utc):
             raise HTTPException(status_code=400, detail="Package expired")
@@ -711,22 +793,28 @@ async def watch_link(link_id: str, background_tasks: BackgroundTasks, user: dict
     if not link:
         raise HTTPException(status_code=404, detail="Link not found")
     
-    package = await db.packages.find_one({"name": user["active_package"]}, {"_id": 0})
-    if not package:
-        raise HTTPException(status_code=400, detail="Package not found")
+    # Handle free package vs paid package
+    if user.get("is_free_package", False):
+        free_pkg = await db.free_package_settings.find_one({}, {"_id": 0})
+        daily_ads = free_pkg.get("daily_ads", 4) if free_pkg else 4
+        earning = free_pkg.get("earning_per_ad", 0.50) if free_pkg else 0.50
+    else:
+        package = await db.packages.find_one({"name": user["active_package"]}, {"_id": 0})
+        if not package:
+            raise HTTPException(status_code=400, detail="Package not found")
+        daily_ads = package["daily_ads"]
+        earning = package["earning_per_ad"]
     
     today = datetime.now(timezone.utc).date().isoformat()
     watch_record = await db.watch_records.find_one({"user_id": user["id"], "date": today})
     
     watched_today = watch_record["watched"] if watch_record else 0
-    if watched_today >= package["daily_ads"]:
+    if watched_today >= daily_ads:
         raise HTTPException(status_code=400, detail="Daily quota completed")
     
     watched_links = watch_record.get("watched_links", []) if watch_record else []
     if link_id in watched_links:
         raise HTTPException(status_code=400, detail="Link already watched today")
-    
-    earning = package["earning_per_ad"]
     
     await db.watch_records.update_one(
         {"user_id": user["id"], "date": today},
@@ -1170,6 +1258,32 @@ async def admin_update_settings(data: SystemSettingsUpdate, admin: dict = Depend
         await db.system_settings.update_one({}, {"$set": update_data}, upsert=True)
     settings = await db.system_settings.find_one({}, {"_id": 0})
     return settings
+
+# Free Package Admin Endpoints
+@api_router.get("/admin/free-package", response_model=FreePackageSettings)
+async def admin_get_free_package(admin: dict = Depends(get_admin_user)):
+    """Get free package settings for admin"""
+    free_pkg = await db.free_package_settings.find_one({}, {"_id": 0})
+    if not free_pkg:
+        free_pkg = {
+            "is_enabled": True,
+            "name": "Free Trial",
+            "daily_ads": 4,
+            "earning_per_ad": 0.50,
+            "withdrawal_target": 100.0,
+            "description": "Watch ads daily and earn up to $100. Activate a paid package to withdraw your earnings."
+        }
+        await db.free_package_settings.insert_one(free_pkg)
+    return free_pkg
+
+@api_router.put("/admin/free-package")
+async def admin_update_free_package(data: FreePackageUpdate, admin: dict = Depends(get_admin_user)):
+    """Update free package settings"""
+    update_data = {k: v for k, v in data.model_dump().items() if v is not None}
+    if update_data:
+        await db.free_package_settings.update_one({}, {"$set": update_data}, upsert=True)
+    free_pkg = await db.free_package_settings.find_one({}, {"_id": 0})
+    return free_pkg
 
 @api_router.get("/admin/transactions")
 async def admin_get_transactions(admin: dict = Depends(get_admin_user)):

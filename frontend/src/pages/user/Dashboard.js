@@ -1,12 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth, api, useToast } from '@/lib/context';
-import { Wallet, DollarSign, Users, ArrowUpRight, ArrowDownLeft, Play, Package, TrendingUp, Copy, Sparkles, Target, Zap } from 'lucide-react';
+import { Wallet, DollarSign, Users, ArrowUpRight, ArrowDownLeft, Play, Package, TrendingUp, Copy, Sparkles, Target, Zap, AlertTriangle, Gift, Lock } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const UserDashboard = () => {
   const { user, refreshUser } = useAuth();
   const toast = useToast();
   const [progress, setProgress] = useState({ watched_today: 0, daily_quota: 0, earnings_today: 0 });
+  const [freePackage, setFreePackage] = useState(null);
+  const [showTargetModal, setShowTargetModal] = useState(false);
   const [loading, setLoading] = useState(true);
 
   const fetchData = async () => {
@@ -15,6 +18,11 @@ const UserDashboard = () => {
       if (user?.active_package) {
         const res = await api.get('/watch/progress');
         setProgress(res.data);
+      }
+      // Fetch free package settings if user is on free package
+      if (user?.is_free_package) {
+        const freeRes = await api.get('/free-package/settings');
+        setFreePackage(freeRes.data);
       }
     } catch (e) {
       console.error(e);
@@ -29,8 +37,19 @@ const UserDashboard = () => {
     return () => clearInterval(interval);
   }, []);
 
+  // Check if user reached the free package target
+  useEffect(() => {
+    if (user?.is_free_package && freePackage && user?.balance >= freePackage.withdrawal_target) {
+      setShowTargetModal(true);
+    }
+  }, [user, freePackage]);
+
   const progressPercent = progress.daily_quota > 0 
     ? (progress.watched_today / progress.daily_quota) * 100 
+    : 0;
+
+  const freeTargetPercent = freePackage && freePackage.withdrawal_target > 0
+    ? Math.min((user?.balance || 0) / freePackage.withdrawal_target * 100, 100)
     : 0;
 
   return (
@@ -47,6 +66,93 @@ const UserDashboard = () => {
           <p className="text-slate-400 text-sm">Ready to earn? Let's check your progress today.</p>
         </div>
       </div>
+
+      {/* Free Package Target Banner - Only show for free package users */}
+      {user?.is_free_package && freePackage && (
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className={`rounded-3xl p-6 relative overflow-hidden ${
+            freeTargetPercent >= 100 
+              ? 'bg-gradient-to-r from-amber-500/20 to-orange-500/20 border border-amber-500/40' 
+              : 'bg-gradient-to-r from-cyan-500/10 to-blue-500/10 border border-cyan-500/30'
+          }`}
+        >
+          <div className="flex flex-col md:flex-row items-center gap-6">
+            <div className={`w-16 h-16 rounded-2xl flex items-center justify-center ${
+              freeTargetPercent >= 100 
+                ? 'bg-gradient-to-br from-amber-500 to-orange-500' 
+                : 'bg-gradient-to-br from-cyan-500 to-blue-500'
+            }`}>
+              {freeTargetPercent >= 100 ? <Gift className="w-8 h-8 text-white" /> : <Target className="w-8 h-8 text-white" />}
+            </div>
+            
+            <div className="flex-1 text-center md:text-left">
+              <div className="flex items-center justify-center md:justify-start gap-2 mb-2">
+                <span className="px-3 py-1 rounded-full bg-cyan-500/20 text-cyan-400 text-xs font-semibold">
+                  {freePackage.name}
+                </span>
+                {freeTargetPercent >= 100 && (
+                  <span className="px-3 py-1 rounded-full bg-amber-500/20 text-amber-400 text-xs font-semibold animate-pulse">
+                    Target Reached!
+                  </span>
+                )}
+              </div>
+              <h3 className="text-lg font-bold text-white mb-1">
+                {freeTargetPercent >= 100 
+                  ? "Congratulations! You've reached your target!" 
+                  : "Earn to Unlock Withdrawals"}
+              </h3>
+              <p className="text-sm text-slate-400 mb-4">
+                {freeTargetPercent >= 100 
+                  ? "Activate a paid package to withdraw your earnings and unlock unlimited earning potential." 
+                  : freePackage.description}
+              </p>
+              
+              {/* Progress Bar */}
+              <div className="mb-4">
+                <div className="flex justify-between text-sm mb-2">
+                  <span className="text-slate-400">Progress to Withdrawal</span>
+                  <span className={freeTargetPercent >= 100 ? 'text-amber-400 font-bold' : 'text-cyan-400 font-bold'}>
+                    ${user?.balance?.toFixed(2)} / ${freePackage.withdrawal_target?.toFixed(2)}
+                  </span>
+                </div>
+                <div className="w-full bg-slate-700/50 rounded-full h-3 overflow-hidden">
+                  <motion.div 
+                    initial={{ width: 0 }}
+                    animate={{ width: `${freeTargetPercent}%` }}
+                    transition={{ duration: 1, ease: "easeOut" }}
+                    className={`h-full rounded-full ${
+                      freeTargetPercent >= 100 
+                        ? 'bg-gradient-to-r from-amber-500 to-orange-500' 
+                        : 'bg-gradient-to-r from-cyan-500 to-blue-500'
+                    }`}
+                    style={{ boxShadow: freeTargetPercent >= 100 ? '0 0 10px rgba(245, 158, 11, 0.5)' : '0 0 10px rgba(8, 145, 178, 0.5)' }}
+                  />
+                </div>
+              </div>
+
+              {freeTargetPercent >= 100 ? (
+                <Link to="/packages" className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 text-white font-semibold hover:opacity-90 transition-all shadow-lg shadow-amber-500/30">
+                  <Package className="w-5 h-5" />
+                  Activate Paid Package Now
+                </Link>
+              ) : (
+                <div className="flex items-center gap-4 text-sm">
+                  <div className="flex items-center gap-2 text-slate-400">
+                    <Play className="w-4 h-4" />
+                    <span>{freePackage.daily_ads} videos/day</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-emerald-400">
+                    <DollarSign className="w-4 h-4" />
+                    <span>${freePackage.earning_per_ad?.toFixed(2)}/video</span>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </motion.div>
+      )}
 
       {/* Stats Grid */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
@@ -276,6 +382,74 @@ const UserDashboard = () => {
           </div>
         </div>
       </div>
+
+      {/* Target Reached Modal */}
+      <AnimatePresence>
+        {showTargetModal && user?.is_free_package && freePackage && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              className="glass rounded-3xl p-8 w-full max-w-lg text-center relative overflow-hidden"
+            >
+              {/* Celebration Effect */}
+              <div className="absolute inset-0 bg-gradient-to-br from-amber-500/10 to-orange-500/10"></div>
+              
+              <div className="relative z-10">
+                {/* Icon */}
+                <div className="w-24 h-24 rounded-full bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center mx-auto mb-6 shadow-lg shadow-amber-500/30">
+                  <Gift className="w-12 h-12 text-white" />
+                </div>
+
+                {/* Content */}
+                <h2 className="text-2xl font-bold text-white mb-3">
+                  Congratulations! 🎉
+                </h2>
+                <p className="text-lg text-amber-400 font-semibold mb-4">
+                  You've reached ${freePackage.withdrawal_target?.toFixed(2)}!
+                </p>
+                <p className="text-slate-400 mb-6">
+                  Your current balance is <span className="text-white font-bold">${user?.balance?.toFixed(2)}</span>. 
+                  To withdraw your earnings and unlock unlimited earning potential, please activate a paid package.
+                </p>
+
+                {/* Warning */}
+                <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 mb-6">
+                  <div className="flex items-start gap-3">
+                    <Lock className="w-5 h-5 text-amber-400 flex-shrink-0 mt-0.5" />
+                    <p className="text-sm text-amber-400 text-left">
+                      Withdrawals are locked until you activate a paid package. Your earned balance will remain safe.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Actions */}
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <button
+                    onClick={() => setShowTargetModal(false)}
+                    className="flex-1 py-3 rounded-xl bg-slate-700/50 text-slate-300 font-medium hover:bg-slate-700 transition-colors"
+                  >
+                    Maybe Later
+                  </button>
+                  <Link
+                    to="/packages"
+                    className="flex-1 py-3 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 text-white font-semibold hover:opacity-90 transition-all flex items-center justify-center gap-2 shadow-lg shadow-amber-500/30"
+                  >
+                    <Package className="w-5 h-5" />
+                    View Packages
+                  </Link>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

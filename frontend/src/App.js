@@ -25,6 +25,7 @@ import AdminMLM from "@/pages/admin/MLM";
 import AdminRanks from "@/pages/admin/Ranks";
 import AdminSettings from "@/pages/admin/Settings";
 import AdminTransactions from "@/pages/admin/Transactions";
+import AdminFreePackage from "@/pages/admin/FreePackage";
 
 // Layout
 import DashboardLayout from "@/components/DashboardLayout";
@@ -181,6 +182,13 @@ function App() {
               <ProtectedRoute adminOnly>
                 <DashboardLayout isAdmin>
                   <AdminPackages />
+                </DashboardLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/admin/free-package" element={
+              <ProtectedRoute adminOnly>
+                <DashboardLayout isAdmin>
+                  <AdminFreePackage />
                 </DashboardLayout>
               </ProtectedRoute>
             } />

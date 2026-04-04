@@ -3,7 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/lib/context';
 import {
   LayoutDashboard, Package, Play, ArrowDownLeft, ArrowUpRight,
-  Users, Award, History, Settings, LogOut, Menu, X, User, ChevronRight, Sparkles, Eye, ArrowLeft
+  Users, Award, History, Settings, LogOut, Menu, X, User, ChevronRight, Sparkles, Eye, ArrowLeft, Gift
 } from 'lucide-react';
 
 const LOGO_URL = "https://customer-assets.emergentagent.com/job_e1272004-e80f-434e-aadb-e8d8dc2b88c2/artifacts/zq3sywj3_Untitled_design__1_-removebg-preview.png";
@@ -25,7 +25,8 @@ const adminNavItems = [
   { path: '/admin/users', label: 'Users', icon: Users },
   { path: '/admin/deposits', label: 'Deposits', icon: ArrowDownLeft },
   { path: '/admin/withdrawals', label: 'Withdrawals', icon: ArrowUpRight },
-  { path: '/admin/packages', label: 'Packages', icon: Package },
+  { path: '/admin/packages', label: 'Paid Packages', icon: Package },
+  { path: '/admin/free-package', label: 'Free Package', icon: Gift },
   { path: '/admin/links', label: 'Links', icon: Play },
   { path: '/admin/mlm', label: 'MLM Settings', icon: Users },
   { path: '/admin/ranks', label: 'Ranks', icon: Award },
