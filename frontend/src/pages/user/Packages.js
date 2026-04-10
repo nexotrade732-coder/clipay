@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { useAuth, api, useToast } from '@/lib/context';
-import { Check, Loader2, Star, Sparkles, TrendingUp, Zap } from 'lucide-react';
+import { Check, Loader2, Star, Sparkles, TrendingUp, Zap, AlertTriangle, ArrowDownLeft, Users, DollarSign } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 const UserPackages = () => {
   const { user, refreshUser } = useAuth();
@@ -8,9 +10,11 @@ const UserPackages = () => {
   const [packages, setPackages] = useState([]);
   const [loading, setLoading] = useState(true);
   const [purchasing, setPurchasing] = useState(null);
+  const [totalDeposits, setTotalDeposits] = useState(0);
 
   useEffect(() => {
     fetchPackages();
+    fetchDeposits();
   }, []);
 
   const fetchPackages = async () => {
@@ -24,7 +28,24 @@ const UserPackages = () => {
     }
   };
 
+  const fetchDeposits = async () => {
+    try {
+      const res = await api.get('/deposits/my');
+      const approvedDeposits = res.data.filter(d => d.status === 'approved');
+      const total = approvedDeposits.reduce((sum, d) => sum + d.amount, 0);
+      setTotalDeposits(total);
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
   const handlePurchase = async (pkg) => {
+    // Check if free package user trying to use free earnings
+    if (user?.is_free_package && totalDeposits < pkg.price) {
+      toast.error(`Free package earnings cannot be used. Please deposit at least $${pkg.price.toFixed(2)} first.`);
+      return;
+    }
+
     if (user.balance < pkg.price) {
       toast.error('Insufficient balance. Please deposit funds first.');
       return;
@@ -68,6 +89,15 @@ const UserPackages = () => {
     }
   };
 
+  // Check if user can purchase (for free package users)
+  const canPurchase = (pkg) => {
+    if (!user?.is_free_package) return user?.balance >= pkg.price;
+    // Free package users need actual deposits
+    return totalDeposits >= pkg.price && user?.balance >= pkg.price;
+  };
+
+  const minPackagePrice = packages.length > 0 ? Math.min(...packages.map(p => p.price)) : 10;
+
   return (
     <div className="max-w-5xl mx-auto space-y-8" data-testid="packages-page">
       {/* Header */}
@@ -84,8 +114,87 @@ const UserPackages = () => {
         <div className="mt-6 inline-flex items-center gap-3 px-5 py-3 rounded-2xl glass-light">
           <span className="text-sm text-slate-400">Your Balance:</span>
           <span className="text-xl font-bold text-white">${user?.balance?.toFixed(2) || '0.00'}</span>
+          {user?.is_free_package && (
+            <span className="px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-400 text-xs font-medium">
+              Free Earnings
+            </span>
+          )}
         </div>
       </div>
+
+      {/* FREE PACKAGE USER WARNING - Important Conditions */}
+      {user?.is_free_package && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="rounded-2xl p-6 bg-gradient-to-r from-amber-500/20 to-orange-500/20 border-2 border-amber-500/50"
+        >
+          <div className="flex items-start gap-4">
+            <div className="w-12 h-12 rounded-xl bg-amber-500/30 flex items-center justify-center flex-shrink-0">
+              <AlertTriangle className="w-6 h-6 text-amber-400" />
+            </div>
+            <div className="flex-1">
+              <h3 className="text-lg font-bold text-amber-400 mb-2">
+                Activate Your Account to Withdraw
+              </h3>
+              <p className="text-slate-300 text-sm mb-4">
+                Your free package earnings (${user?.balance?.toFixed(2)}) are saved! To withdraw, you need to:
+              </p>
+              
+              {/* Conditions */}
+              <div className="space-y-3 mb-5">
+                <div className="flex items-center gap-3 p-3 rounded-xl bg-black/30">
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center ${totalDeposits >= minPackagePrice ? 'bg-emerald-500' : 'bg-slate-600'}`}>
+                    {totalDeposits >= minPackagePrice ? <Check className="w-4 h-4 text-white" /> : <DollarSign className="w-4 h-4 text-slate-400" />}
+                  </div>
+                  <div className="flex-1">
+                    <p className={`font-medium ${totalDeposits >= minPackagePrice ? 'text-emerald-400' : 'text-white'}`}>
+                      1. Deposit minimum ${minPackagePrice.toFixed(0)} or more
+                    </p>
+                    <p className="text-xs text-slate-400">
+                      {totalDeposits >= minPackagePrice 
+                        ? `Completed - You've deposited $${totalDeposits.toFixed(2)}` 
+                        : `You've deposited: $${totalDeposits.toFixed(2)} (Need $${(minPackagePrice - totalDeposits).toFixed(2)} more)`}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-3 p-3 rounded-xl bg-black/30">
+                  <div className="w-8 h-8 rounded-full bg-slate-600 flex items-center justify-center">
+                    <Users className="w-4 h-4 text-slate-400" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="font-medium text-white">
+                      2. Refer 2 members who also activate with $10+
+                    </p>
+                    <p className="text-xs text-slate-400">
+                      Share your referral code and help them get started
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/30 mb-4">
+                <p className="text-sm text-red-400 flex items-start gap-2">
+                  <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                  <span>
+                    <strong>Important:</strong> Free package earnings cannot be used to activate packages. 
+                    You must deposit real money to purchase any package.
+                  </span>
+                </p>
+              </div>
+
+              <Link 
+                to="/deposit" 
+                className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 text-black font-bold hover:opacity-90 transition-all"
+              >
+                <ArrowDownLeft className="w-5 h-5" />
+                Deposit Now
+              </Link>
+            </div>
+          </div>
+        </motion.div>
+      )}
 
       {/* Packages Grid */}
       <div className="grid md:grid-cols-3 gap-6">
@@ -93,6 +202,8 @@ const UserPackages = () => {
           const isActive = user?.active_package === pkg.name;
           const isPopular = index === 1;
           const colors = getPackageColor(index);
+          const canBuy = canPurchase(pkg);
+          const needsDeposit = user?.is_free_package && totalDeposits < pkg.price;
           
           return (
             <div
@@ -166,10 +277,18 @@ const UserPackages = () => {
                   <Zap className="w-4 h-4 inline mr-2" />
                   Active
                 </button>
+              ) : needsDeposit ? (
+                <Link
+                  to="/deposit"
+                  className="w-full py-3 rounded-xl text-sm font-semibold bg-amber-500/20 text-amber-400 border border-amber-500/30 flex items-center justify-center gap-2 hover:bg-amber-500/30 transition-colors"
+                >
+                  <ArrowDownLeft className="w-4 h-4" />
+                  Deposit ${pkg.price} to Activate
+                </Link>
               ) : (
                 <button
                   onClick={() => handlePurchase(pkg)}
-                  disabled={purchasing === pkg.id || user.balance < pkg.price}
+                  disabled={purchasing === pkg.id || !canBuy}
                   className={`w-full py-3 rounded-xl text-sm font-semibold transition-all duration-300 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed ${
                     isPopular 
                       ? 'btn-primary' 
@@ -180,7 +299,7 @@ const UserPackages = () => {
                   data-testid={`purchase-${pkg.name.toLowerCase()}-btn`}
                 >
                   {purchasing === pkg.id && <Loader2 className="w-4 h-4 animate-spin" />}
-                  {user.balance < pkg.price ? 'Insufficient Balance' : 'Get Started'}
+                  {!canBuy ? 'Insufficient Balance' : 'Get Started'}
                 </button>
               )}
             </div>

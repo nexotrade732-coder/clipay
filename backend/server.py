@@ -560,6 +560,24 @@ async def purchase_package(package_id: str, user: dict = Depends(get_current_use
     if not package:
         raise HTTPException(status_code=404, detail="Package not found")
     
+    # FREE PACKAGE USERS CANNOT USE FREE EARNINGS TO BUY PACKAGES
+    # They must deposit real money first
+    if user.get("is_free_package", False):
+        # Check if user has any approved deposits
+        total_deposits = await db.deposits.aggregate([
+            {"$match": {"user_id": user["id"], "status": "approved"}},
+            {"$group": {"_id": None, "total": {"$sum": "$amount"}}}
+        ]).to_list(1)
+        
+        deposited_amount = total_deposits[0]["total"] if total_deposits else 0
+        
+        # User must have deposited at least the package price
+        if deposited_amount < package["price"]:
+            raise HTTPException(
+                status_code=400, 
+                detail=f"Free package earnings cannot be used to purchase packages. Please deposit at least ${package['price']:.2f} to activate your account."
+            )
+    
     if user["balance"] < package["price"]:
         raise HTTPException(status_code=400, detail="Insufficient balance")
     
